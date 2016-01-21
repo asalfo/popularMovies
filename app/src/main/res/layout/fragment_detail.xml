@@ -1,0 +1,67 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/movie_poster"
+            android:scaleType="centerCrop"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"/>
+        <TextView
+            android:id="@+id/movie_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sweets"
+            android:textSize="32sp"
+            android:fontFamily="sans-serif-condensed"
+            android:layout_margin="5dp"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_below="@+id/movie_poster"
+            android:layout_alignParentLeft="true"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/movie_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2016-12-8"
+            android:textSize="20sp"
+            android:layout_below="@+id/movie_title"
+            android:layout_alignParentLeft="true"
+            android:fontFamily="sans-serif-condensed"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:typeface="monospace" />
+        <TextView
+            android:id="@+id/movie_rate_average"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="7.8"
+            android:textSize="25sp"
+            android:fontFamily="sans-serif-condensed"
+            android:layout_margin="5dp"
+            android:layout_below="@+id/movie_title"
+            android:layout_alignParentRight="true"/>
+        <TextView
+            android:fontFamily="sans-serif-condensed"
+            android:id="@+id/movie_synopsis"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/synopsis"
+            android:textSize="20sp"
+            android:layout_margin="5dp"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_below="@+id/movie_date"
+            android:layout_alignParentLeft="true"
+            android:longClickable="false"
+            android:padding="5dp" />
+
+
+
+    </RelativeLayout>
+</ScrollView>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="grey">#cccccc</color>
+    <color name="movie_app_light_black">#d6060606</color>
+    <color name="movie_app_black">#080808</color>
+    <color name="movie_app_dark_black">#080808</color>
+</resources>

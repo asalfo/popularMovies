@@ -1,0 +1,33 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="@style/Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/movie_app_black</item>
+        <item name="colorPrimaryDark">@color/movie_app_dark_black</item>
+    </style>
+
+    <!-- Main activity theme. -->
+    <style name="MovieAppTheme" parent="AppTheme">
+        <item name="actionBarStyle">@style/ActionBar.Solid.MovieApp</item>
+    </style>
+
+    <style name="MovieAppDetailTheme" parent="MovieAppTheme">
+        <item name="displayOptions">useLogo|showHome</item>
+    </style>
+    <!-- Settings activity theme. -->
+    <style name="SettingsTheme" parent="AppTheme">
+    </style>
+
+    <!-- main activity action bar styles -->
+    <style name="ActionBar.Solid.MovieApp" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+        <item name="displayOptions">useLogo|showHome|showTitle</item>
+        <item name="logo">@drawable/ic_logo</item>
+    </style>
+
+    <!-- Style for forecast listview -->
+    <style name="MovietListStyle">
+        <!-- Here it's a stub.  In screens of sufficient width, this style includes modifications
+        for two-pane layout -->
+    </style>
+
+</resources>
