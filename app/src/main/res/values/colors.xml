@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="black">#ff000000</color>
     <color name="grey">#cccccc</color>
     <color name="movie_app_light_black">#d6060606</color>
     <color name="movie_app_black">#080808</color>
     <color name="movie_app_dark_black">#080808</color>
+    <color name="text_secondary_dark">#ff999999</color>
+    <color name="text_primary_dark">#ffffffff</color>
+    <color name="primary_text_color">@color/text_primary_dark</color>
+    <color name="secondary_text_color">@color/text_secondary_dark</color>
+    <color name="disabled_text_color">@color/grey</color>
 </resources>

@@ -1,6 +1,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#080707">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -8,59 +9,68 @@
 
         <ImageView
             android:id="@+id/movie_poster"
-            android:scaleType="centerCrop"
             android:layout_width="match_parent"
-            android:layout_height="300dp"/>
-        <TextView
-            android:id="@+id/movie_title"
-            android:layout_width="wrap_content"
+            android:layout_height="300dp"
+            android:scaleType="centerCrop" />
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/movie_basic_info"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Sweets"
-            android:textSize="32sp"
-            android:fontFamily="sans-serif-condensed"
-            android:layout_margin="5dp"
-            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:gravity="center_vertical"
+            android:minHeight="?android:attr/listPreferredItemHeight"
             android:layout_below="@+id/movie_poster"
-            android:layout_alignParentLeft="true"
-            android:textStyle="bold" />
+            android:orientation="horizontal"
+            android:background="#5c5757">
+        <LinearLayout
+            android:layout_weight="1"
+            android:orientation="vertical"
+            style="@style/wrap">
+            <TextView
+                android:id="@+id/movie_title"
+                style="@style/PrimaryText.Large"
+                android:layout_margin="@dimen/content_padding"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="Sweets"
+                android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/movie_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="2016-12-8"
-            android:textSize="20sp"
-            android:layout_below="@+id/movie_title"
-            android:layout_alignParentLeft="true"
-            android:fontFamily="sans-serif-condensed"
-            android:layout_marginLeft="5dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            android:typeface="monospace" />
+            <TextView
+                android:id="@+id/movie_date"
+                style="@style/PrimaryText.Small"
+                android:layout_marginLeft="@dimen/content_padding"
+                android:layout_marginBottom="@dimen/content_padding"
+                android:lineSpacingMultiplier="@dimen/line_spacing_expanded"
+                android:singleLine="true"
+                android:text="@string/movie_date"/>
+        </LinearLayout>
+       
+ <LinearLayout
+     android:orientation="vertical"
+     android:background="@drawable/ic_stars_red"
+     android:layout_height="59dp"
+     android:layout_width="59dp"
+     android:layout_weight="0">
         <TextView
             android:id="@+id/movie_rate_average"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="7.8"
-            android:textSize="25sp"
-            android:fontFamily="sans-serif-condensed"
-            android:layout_margin="5dp"
-            android:layout_below="@+id/movie_title"
-            android:layout_alignParentRight="true"/>
-        <TextView
-            android:fontFamily="sans-serif-condensed"
-            android:id="@+id/movie_synopsis"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/synopsis"
-            android:textSize="20sp"
-            android:layout_margin="5dp"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:layout_below="@+id/movie_date"
-            android:layout_alignParentLeft="true"
-            android:longClickable="false"
-            android:padding="5dp" />
+            style="@style/PrimaryText.Micro"
+            android:lineSpacingMultiplier="@dimen/line_spacing_expanded"
+            android:text="@string/movie_rate"
+            android:gravity="left"
+            android:layout_gravity="center"
+            android:layout_marginTop="24dp" />
+ </LinearLayout>
+        </LinearLayout>
 
+        <TextView
+            android:id="@+id/movie_synopsis"
+            style="@style/PrimaryText.Small"
+            android:layout_below="@+id/movie_basic_info"
+            android:lineSpacingMultiplier="@dimen/line_spacing_expanded"
+            android:paddingLeft="@dimen/content_padding"
+            android:paddingRight="@dimen/content_padding"
+            android:text="@string/synopsis" />
 
 
     </RelativeLayout>

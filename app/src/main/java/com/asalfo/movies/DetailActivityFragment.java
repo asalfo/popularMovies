@@ -42,8 +42,8 @@ public class DetailActivityFragment extends Fragment {
             movieTitle.setText(movie.mTitle);
             TextView movieReleaseDate =   (TextView) rootView.findViewById(R.id.movie_date);
             movieReleaseDate.setText(movie.mReleaseDate);
-//            TextView movieRateAvg =   (TextView) rootView.findViewById(R.id.movie_rate_average);
-//            movieRateAvg.setText(movie.mRating.toString());
+           TextView movieRateAvg =   (TextView) rootView.findViewById(R.id.movie_rate_average);
+           movieRateAvg.setText(movie.mRating.toString());
             TextView movieSynopsis =   (TextView) rootView.findViewById(R.id.movie_synopsis);
             movieSynopsis.setText(movie.mSynopsis);
 

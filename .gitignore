@@ -1,7 +1,7 @@
 # Built application files
 *.apk
 *.ap_
-
+*.iml
 # Files for the Dalvik VM
 *.dex
 
@@ -31,6 +31,8 @@ proguard/
 # Android Studio captures folder
 captures/
 
+## Directory-based project format:
+.idea/
+
 #Others files
-.DS_Store
-.idea	
+.DS_Store/	
