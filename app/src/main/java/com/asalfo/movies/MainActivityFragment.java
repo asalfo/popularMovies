@@ -1,13 +1,8 @@
 package com.asalfo.movies;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,20 +17,7 @@ import com.asalfo.model.Movie;
 import com.asalfo.model.MovieCollection;
 import com.asalfo.service.ApiService;
 import com.asalfo.service.ServiceGenerator;
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 
 import retrofit2.Call;
@@ -46,25 +28,24 @@ import retrofit2.Response;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment  {
+public class MainActivityFragment extends Fragment {
     public static final String LOG_TAG = MainActivityFragment.class.getSimpleName();
 
     public static final ApiService apiService = ServiceGenerator.createService(ApiService.class);
     public static final String CURRENT_PAGE_KEY = "current_page";
     public static final String NEXT_PAGE_KEY = "next_page";
-    private MovieAdapter mMovieAdapter;
-    private ArrayList<Movie> mMovieList;
+    private static final String SELECTED_KEY = "selected_position";
+    private static final String MOVIE_LIST_KEY = "movie_list";
     GridView mGridView;
     ProgressBar mProgressBar;
     SwipeRefreshLayout mSwipeLayout;
     int mCurrentPage;
     int mNextPage;
     Boolean mUserScrolled = false;
+    private MovieAdapter mMovieAdapter;
+    private ArrayList<Movie> mMovieList;
     private int mPosition = GridView.INVALID_POSITION;
-    private static final String SELECTED_KEY = "selected_position";
-    private static final String MOVIE_LIST_KEY = "movie_list";
     private String mSortValue;
-
 
 
     public MainActivityFragment() {
@@ -169,7 +150,7 @@ public class MainActivityFragment extends Fragment  {
         String sort_value = Utility.getPreferredSortBy(getActivity());
         if (sort_value != null && !sort_value.equals(mSortValue)) {
             mMovieAdapter.clear();
-            mNextPage =1;
+            mNextPage = 1;
             mCurrentPage = 0;
             mSortValue = sort_value;
         }
@@ -187,24 +168,24 @@ public class MainActivityFragment extends Fragment  {
     public void onStart() {
         super.onStart();
         updateMovie();
-        if(mPosition != GridView.INVALID_POSITION) {
+        if (mPosition != GridView.INVALID_POSITION) {
             mGridView.smoothScrollToPosition(mPosition);
             Log.d(LOG_TAG, "Movie Current position!" + mPosition);
         }
     }
 
 
-    public void fetchMovies(String sort,int page){
-        Call<MovieCollection> call = apiService.getMovies(sort,page,BuildConfig.THE_MOVIE_DB_API_KEY);
+    public void fetchMovies(String sort, int page) {
+        Call<MovieCollection> call = apiService.getMovies(sort, page, BuildConfig.THE_MOVIE_DB_API_KEY);
         call.enqueue(new Callback<MovieCollection>() {
             @Override
             public void onResponse(Response<MovieCollection> response) {
-                if (response.isSuccess()){
+                if (response.isSuccess()) {
                     MovieCollection collection = response.body();
                     mMovieAdapter.addAll(collection.getResults());
                     mCurrentPage = mNextPage;
-                }else {
-                    Log.d(LOG_TAG,"Faill");
+                } else {
+                    Log.d(LOG_TAG, "Faill");
                 }
 
                 mProgressBar.setVisibility(View.GONE);
@@ -212,7 +193,7 @@ public class MainActivityFragment extends Fragment  {
 
             @Override
             public void onFailure(Throwable t) {
-                Log.d(LOG_TAG,t.getMessage());
+                Log.d(LOG_TAG, t.getMessage());
             }
         });
 

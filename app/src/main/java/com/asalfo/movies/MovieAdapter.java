@@ -15,7 +15,7 @@ import java.util.ArrayList;
 /**
  * Created by asalfo on 12/01/16.
  */
-public class MovieAdapter  extends ArrayAdapter<Movie> {
+public class MovieAdapter extends ArrayAdapter<Movie> {
     public MovieAdapter(Context context, int resource, ArrayList<Movie> movies) {
         super(context, resource, movies);
     }
@@ -27,7 +27,7 @@ public class MovieAdapter  extends ArrayAdapter<Movie> {
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.grid_item_movie, parent, false);
         }
-        String thumbnailUrl = Utility.generatePosterUrl(movie.getPosterPath(),"w92");
+        String thumbnailUrl = Utility.generatePosterUrl(movie.getPosterPath(), "w92");
         ImageView posterView = (ImageView) convertView.findViewById(R.id.grid_item_poster);
         Picasso.with(this.getContext()).load(thumbnailUrl).fit().into(posterView);
         return convertView;

@@ -3,23 +3,18 @@ package com.asalfo.image;
 /**
  * Created by asalfo on 15/01/16.
  */
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.RectF;
+
 import com.squareup.picasso.Transformation;
 
 public class CropTransformation implements Transformation {
 
-    public enum CropType {
-        TOP,
-        CENTER,
-        BOTTOM
-    }
-
     private int mWidth;
     private int mHeight;
     private CropType mCropType = CropType.CENTER;
-
     public CropTransformation() {
     }
 
@@ -33,7 +28,8 @@ public class CropTransformation implements Transformation {
         mCropType = cropType;
     }
 
-    @Override public Bitmap transform(Bitmap source) {
+    @Override
+    public Bitmap transform(Bitmap source) {
         mWidth = mWidth == 0 ? source.getWidth() : mWidth;
         mHeight = mHeight == 0 ? source.getHeight() : mHeight;
 
@@ -55,7 +51,8 @@ public class CropTransformation implements Transformation {
         return bitmap;
     }
 
-    @Override public String key() {
+    @Override
+    public String key() {
         return "CropTransformation(width=" + mWidth + ", height=" + mHeight + ", cropType=" + mCropType
                 + ")";
     }
@@ -71,5 +68,11 @@ public class CropTransformation implements Transformation {
             default:
                 return 0;
         }
+    }
+
+    public enum CropType {
+        TOP,
+        CENTER,
+        BOTTOM
     }
 }

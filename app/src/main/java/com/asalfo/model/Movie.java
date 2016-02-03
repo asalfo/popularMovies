@@ -7,6 +7,16 @@ import android.os.Parcelable;
  * Created by asalfo on 12/01/16.
  */
 public class Movie implements Parcelable {
+    public static final Parcelable.Creator<Movie> CREATOR
+            = new Parcelable.Creator<Movie>() {
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
     private String id;
     private String title;
     private String originalTitle;
@@ -22,7 +32,8 @@ public class Movie implements Parcelable {
     private Boolean adult;
     private int voteCount;
 
-    public Movie(){}
+    public Movie() {
+    }
 
     public Movie(String id, String title, String originalTitle, String originalLanguage,
                  String posterPath, String backdropPath, String overview, int[] genreIds,
@@ -53,15 +64,6 @@ public class Movie implements Parcelable {
         this.voteAverage = voteAverage;
     }
 
-    @Override
-    public String toString() {
-        return "Movie{" +
-                "title='" + title + '\'' +
-                ", overview='" + overview + '\'' +
-                ", releaseDate='" + releaseDate + '\'' +
-                '}';
-    }
-
     private Movie(Parcel in) {
         this.id = in.readString();
         this.title = in.readString();
@@ -73,7 +75,14 @@ public class Movie implements Parcelable {
         //this.video = in.readByte() != 0;
     }
 
-
+    @Override
+    public String toString() {
+        return "Movie{" +
+                "title='" + title + '\'' +
+                ", overview='" + overview + '\'' +
+                ", releaseDate='" + releaseDate + '\'' +
+                '}';
+    }
 
     @Override
     public int describeContents() {
@@ -91,17 +100,6 @@ public class Movie implements Parcelable {
         dest.writeFloat(voteAverage);
         //dest.writeByte((byte) (video ? 1 : 0));
     }
-
-    public static final Parcelable.Creator<Movie> CREATOR
-            = new Parcelable.Creator<Movie>() {
-        public Movie createFromParcel(Parcel in) {
-            return new Movie(in);
-        }
-
-        public Movie[] newArray(int size) {
-            return new Movie[size];
-        }
-    };
 
     public String getId() {
         return id;
