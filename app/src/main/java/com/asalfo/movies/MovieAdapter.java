@@ -7,10 +7,10 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
+import com.asalfo.model.Movie;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by asalfo on 12/01/16.
@@ -27,7 +27,7 @@ public class MovieAdapter  extends ArrayAdapter<Movie> {
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.grid_item_movie, parent, false);
         }
-        String thumbnailUrl = movie.mThumbnailUrl.replace("#","w92");
+        String thumbnailUrl = Utility.generatePosterUrl(movie.getPosterPath(),"w92");
         ImageView posterView = (ImageView) convertView.findViewById(R.id.grid_item_poster);
         Picasso.with(this.getContext()).load(thumbnailUrl).fit().into(posterView);
         return convertView;

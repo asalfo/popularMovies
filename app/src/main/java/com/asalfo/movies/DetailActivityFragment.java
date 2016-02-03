@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.asalfo.image.CropTransformation;
+import com.asalfo.model.Movie;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -36,16 +37,16 @@ public class DetailActivityFragment extends Fragment {
 
             Movie movie = intent.getParcelableExtra("movie");
             ImageView moviePoster =   (ImageView) rootView.findViewById(R.id.movie_poster);
-            String posterUrl = movie.mThumbnailUrl.replace("#","w780");
+            String posterUrl = Utility.generatePosterUrl(movie.getPosterPath(),"w780");
             Picasso.with(this.getContext()).load(posterUrl).transform(new CropTransformation(0,500, CropTransformation.CropType.TOP)).into(moviePoster);
             TextView movieTitle =   (TextView) rootView.findViewById(R.id.movie_title);
-            movieTitle.setText(movie.mTitle);
+            movieTitle.setText(movie.getOriginalTitle());
             TextView movieReleaseDate =   (TextView) rootView.findViewById(R.id.movie_date);
-            movieReleaseDate.setText(movie.mReleaseDate);
+            movieReleaseDate.setText(movie.getReleaseDate());
            TextView movieRateAvg =   (TextView) rootView.findViewById(R.id.movie_rate_average);
-           movieRateAvg.setText(movie.mRating.toString());
+           movieRateAvg.setText(movie.getVoteAverage().toString());
             TextView movieSynopsis =   (TextView) rootView.findViewById(R.id.movie_synopsis);
-            movieSynopsis.setText(movie.mSynopsis);
+            movieSynopsis.setText(movie.getOverview());
 
        }
         return rootView;
