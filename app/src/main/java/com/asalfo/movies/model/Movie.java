@@ -15,7 +15,7 @@ public class Movie implements Parcelable {
     private String posterPath;
     private String backdropPath;
     private String overview;
-    private String tagTine;
+    private String tagLine;
     private float popularity;
     private Float voteAverage;
     private int voteCount;
@@ -78,7 +78,7 @@ public class Movie implements Parcelable {
         this.popularity = in.readFloat();
         this.homepage = in.readString();
         this.backdropPath = in.readString();
-        this.tagTine = in.readString();
+        this.tagLine = in.readString();
         this.runtine = in.readInt();
         this.budget = in.readDouble();
         this.revenue = in.readDouble();
@@ -98,7 +98,7 @@ public class Movie implements Parcelable {
         dest.writeFloat(popularity);
         dest.writeString(homepage);
         dest.writeString(backdropPath);
-        dest.writeString(tagTine);
+        dest.writeString(tagLine);
         dest.writeInt(runtine);
         dest.writeDouble(budget);
         dest.writeDouble(revenue);
@@ -176,12 +176,12 @@ public class Movie implements Parcelable {
         this.overview = overview;
     }
 
-    public String getTagTine() {
-        return tagTine;
+    public String getTagLine() {
+        return tagLine;
     }
 
-    public void setTagTine(String tagTine) {
-        this.tagTine = tagTine;
+    public void setTagLine(String tagTine) {
+        this.tagLine = tagTine;
     }
 
     public float getPopularity() {

@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.asalfo.movies.data.MovieContract.MovieEntry;
 import com.asalfo.movies.data.MovieContract.ReviewEntry;
 import com.asalfo.movies.data.MovieContract.VideoEntry;
+import com.asalfo.movies.data.MovieContract.FavoriteEntry;
 
 /**
  * Manages a local database for movie data.
@@ -39,8 +40,11 @@ public class MovieDBHelper extends SQLiteOpenHelper {
                 MovieEntry.COLUMN_VOTE_AVERAGE + " REAL NOT NULL, " +
                 MovieEntry.COLUMN_VOTE_COUNT + " REAL NOT NULL, " +
                 MovieEntry.COLUMN_RELEASE_DATE + " TEXT NOT NULL, " +
-                MovieEntry.COLUMN_VIDEO + " BOOL NOT NULL, " +
-                MovieEntry.COLUMN_ADULT + " BOOL NOT NULL " +
+                MovieEntry.COLUMN_HOMEPAGE + " TEXT, " +
+                MovieEntry.COLUMN_TAGLINE + " TEXT, " +
+                MovieEntry.COLUMN_BUDGET + " DOUBLE, " +
+                MovieEntry.COLUMN_REVENUE + " DOUBLE, " +
+                MovieEntry.COLUMN_FAVORITE + " BOOL " +
                 " );";
 
 
@@ -71,9 +75,19 @@ public class MovieDBHelper extends SQLiteOpenHelper {
                 MovieEntry.TABLE_NAME + " (" + MovieEntry._ID + ")  ON DELETE CASCADE" +
                 " );";
 
+        // Create a table to hold favorites.
+        final String SQL_CREATE_FAVORITE_TABLE = "CREATE TABLE " + FavoriteEntry.TABLE_NAME + " (" +
+                FavoriteEntry._ID + " INTEGER PRIMARY KEY," +
+                FavoriteEntry.COLUMN_MOVIE_ID +" INTEGER NOT NULL, " +
+                " FOREIGN KEY (" + FavoriteEntry.COLUMN_MOVIE_ID + ") REFERENCES " +
+                MovieEntry.TABLE_NAME + " (" + MovieEntry._ID + ")  ON DELETE CASCADE" +
+                " );";
+
+
         db.execSQL(SQL_CREATE_MOVIE_TABLE);
         db.execSQL(SQL_CREATE_REVIEW_TABLE);
         db.execSQL(SQL_CREATE_VIDEO_TABLE);
+        db.execSQL(SQL_CREATE_FAVORITE_TABLE);
 
     }
 
@@ -82,6 +96,7 @@ public class MovieDBHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + MovieEntry.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + VideoEntry.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + ReviewEntry.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + FavoriteEntry.TABLE_NAME);
         onCreate(db);
 
     }
