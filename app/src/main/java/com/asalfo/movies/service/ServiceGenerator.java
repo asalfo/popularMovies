@@ -1,4 +1,4 @@
-package com.asalfo.service;
+package com.asalfo.movies.service;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;

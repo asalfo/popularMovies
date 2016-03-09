@@ -1,77 +1,22 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#080707">
+<android.support.v4.widget.NestedScrollView
+    style="@style/match"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.asalfo.movies.MovieDetailActivityFragment"
+    tools:showIn="@layout/activity_detail"
+    style="@style/match">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        <RelativeLayout
+           style="@style/match">
+        <include android:id="@+id/view_pager_layout" layout="@layout/trailer_view_pager" style="@style/match"/>
+        <include android:id="@+id/movie_basic_info" layout="@layout/movie_basic_info" android:layout_below="@+id/view_pager_layout" style="@style/match"/>
 
-        <ImageView
-            android:id="@+id/movie_poster"
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:scaleType="centerCrop" />
-        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/movie_basic_info"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:minHeight="?android:attr/listPreferredItemHeight"
-            android:layout_below="@+id/movie_poster"
-            android:orientation="horizontal"
-            android:background="#5c5757">
-        <LinearLayout
-            android:layout_weight="1"
-            android:orientation="vertical"
-            style="@style/wrap">
-            <TextView
-                android:id="@+id/movie_title"
-                style="@style/PrimaryText.Large"
-                android:layout_margin="@dimen/content_padding"
-                android:ellipsize="end"
-                android:maxLines="2"
-                android:text="Sweets"
-                android:textStyle="bold" />
+        </RelativeLayout>
+</FrameLayout>
 
-            <TextView
-                android:id="@+id/movie_date"
-                style="@style/PrimaryText.Small"
-                android:layout_marginLeft="@dimen/content_padding"
-                android:layout_marginBottom="@dimen/content_padding"
-                android:lineSpacingMultiplier="@dimen/line_spacing_expanded"
-                android:singleLine="true"
-                android:text="@string/movie_date"/>
-        </LinearLayout>
-       
- <LinearLayout
-     android:orientation="vertical"
-     android:background="@drawable/ic_stars_red"
-     android:layout_height="59dp"
-     android:layout_width="59dp"
-     android:layout_weight="0">
-        <TextView
-            android:id="@+id/movie_rate_average"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/PrimaryText.Micro"
-            android:lineSpacingMultiplier="@dimen/line_spacing_expanded"
-            android:text="@string/movie_rate"
-            android:gravity="left"
-            android:layout_gravity="center"
-            android:layout_marginTop="24dp" />
- </LinearLayout>
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/movie_synopsis"
-            style="@style/PrimaryText.Small"
-            android:layout_below="@+id/movie_basic_info"
-            android:lineSpacingMultiplier="@dimen/line_spacing_expanded"
-            android:paddingLeft="@dimen/content_padding"
-            android:paddingRight="@dimen/content_padding"
-            android:text="@string/synopsis" />
+    </android.support.v4.widget.NestedScrollView>
 
 
-    </RelativeLayout>
-</ScrollView>

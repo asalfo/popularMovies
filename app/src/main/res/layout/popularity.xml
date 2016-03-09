@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:baselineAligned="false"
+    android:orientation="horizontal">
+
+    <RelativeLayout
+        android:id="@+id/popularity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="@dimen/TitleSummaryItemPaddingBottom">
+
+        <ImageView
+            android:id="@+id/ic_popularity"
+            android:layout_width="@dimen/phoneRatingWidgetStarWidth"
+            android:layout_height="@dimen/phoneRatingWidgetStarHeight"
+            android:layout_alignParentLeft="true"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical"
+            android:layout_marginRight="8dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/popularity" />
+
+        <TextView
+            android:id="@+id/movie_popularity"
+            style="@style/Text.Subhead.Bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@id/ic_popularity"
+            android:lineSpacingMultiplier="0.85"
+            tools:text="7.5"
+            android:paddingRight="4dp"
+            android:layout_marginTop="10dip" />
+
+    </RelativeLayout>
+</LinearLayout>

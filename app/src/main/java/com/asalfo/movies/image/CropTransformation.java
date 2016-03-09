@@ -1,4 +1,4 @@
-package com.asalfo.image;
+package com.asalfo.movies.image;
 
 /**
  * Created by asalfo on 15/01/16.

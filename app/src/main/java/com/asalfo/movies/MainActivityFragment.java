@@ -1,8 +1,13 @@
 package com.asalfo.movies;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,10 +18,13 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ProgressBar;
 
-import com.asalfo.model.Movie;
-import com.asalfo.model.MovieCollection;
-import com.asalfo.service.ApiService;
-import com.asalfo.service.ServiceGenerator;
+import com.asalfo.movies.adapter.FavoriteMovieAdapter;
+import com.asalfo.movies.adapter.MovieAdapter;
+import com.asalfo.movies.data.MovieContract;
+import com.asalfo.movies.model.Movie;
+import com.asalfo.movies.model.TmdbCollection;
+import com.asalfo.movies.service.ApiService;
+import com.asalfo.movies.service.ServiceGenerator;
 
 import java.util.ArrayList;
 
@@ -28,7 +36,7 @@ import retrofit2.Response;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment {
+public class MainActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     public static final String LOG_TAG = MainActivityFragment.class.getSimpleName();
 
     public static final ApiService apiService = ServiceGenerator.createService(ApiService.class);
@@ -43,9 +51,25 @@ public class MainActivityFragment extends Fragment {
     int mNextPage;
     Boolean mUserScrolled = false;
     private MovieAdapter mMovieAdapter;
+    private FavoriteMovieAdapter mFavoriteMovieAdapter;
     private ArrayList<Movie> mMovieList;
     private int mPosition = GridView.INVALID_POSITION;
     private String mSortValue;
+
+
+    private static final int FAVORITE_MOVIE_LOADER = 0;
+
+    private static final String[] FAVORITE_MOVIE_COLUMNS = {
+            MovieContract.MovieEntry._ID,
+            MovieContract.MovieEntry.COLUMN_MOVIE_ID,
+            MovieContract.MovieEntry.COLUMN_POSTER_PATH,
+            MovieContract.MovieEntry.COLUMN_BACKDROP_PATH
+    };
+
+    public static final int ID = 0;
+    public static final int COLUMN_MOVIE_ID = 1;
+    public static final int COLUMN_POSTER_PATH = 2 ;
+    public static final int COLUMN_BACKDROP_PATH  = 3;
 
 
     public MainActivityFragment() {
@@ -87,6 +111,7 @@ public class MainActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mMovieAdapter = new MovieAdapter(getActivity(), 0, mMovieList);
+         mFavoriteMovieAdapter = new FavoriteMovieAdapter(getActivity(), null, 0);
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
@@ -94,8 +119,8 @@ public class MainActivityFragment extends Fragment {
         mProgressBar.setVisibility(View.GONE);
 
         mGridView = (GridView) rootView.findViewById(R.id.gridview);
-        mGridView.setAdapter(mMovieAdapter);
-
+        mGridView.setAdapter(mFavoriteMovieAdapter);
+        //mGridView.setAdapter(mMovieAdapter);
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
@@ -146,6 +171,14 @@ public class MainActivityFragment extends Fragment {
         return rootView;
     }
 
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        Log.d(LOG_TAG, "Called onActivityCreated!");
+        getLoaderManager().initLoader(FAVORITE_MOVIE_LOADER, null, this);
+        super.onActivityCreated(savedInstanceState);
+    }
+
     private void updateMovie() {
         String sort_value = Utility.getPreferredSortBy(getActivity());
         if (sort_value != null && !sort_value.equals(mSortValue)) {
@@ -158,7 +191,7 @@ public class MainActivityFragment extends Fragment {
             mProgressBar.setVisibility(View.VISIBLE);
 //            FetchMovieTask mMovieTask = new FetchMovieTask();
 //            mMovieTask.execute(sort_value);
-            fetchMovies(sort_value, mNextPage);
+            //fetchMovies(sort_value, mNextPage);
         }
         Log.d(LOG_TAG, "Called updateMovie!" + sort_value);
         Log.d(LOG_TAG, "Called updateMovie!" + mSortValue);
@@ -167,7 +200,7 @@ public class MainActivityFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        updateMovie();
+       // updateMovie();
         if (mPosition != GridView.INVALID_POSITION) {
             mGridView.smoothScrollToPosition(mPosition);
             Log.d(LOG_TAG, "Movie Current position!" + mPosition);
@@ -176,12 +209,12 @@ public class MainActivityFragment extends Fragment {
 
 
     public void fetchMovies(String sort, int page) {
-        Call<MovieCollection> call = apiService.getMovies(sort, page, BuildConfig.THE_MOVIE_DB_API_KEY);
-        call.enqueue(new Callback<MovieCollection>() {
+        Call<TmdbCollection<Movie>> call = apiService.getMovies(sort, page, BuildConfig.THE_MOVIE_DB_API_KEY);
+        call.enqueue(new Callback<TmdbCollection<Movie>>() {
             @Override
-            public void onResponse(Response<MovieCollection> response) {
+            public void onResponse(Response<TmdbCollection<Movie>> response) {
                 if (response.isSuccess()) {
-                    MovieCollection collection = response.body();
+                    TmdbCollection<Movie> collection = response.body();
                     mMovieAdapter.addAll(collection.getResults());
                     mCurrentPage = mNextPage;
                 } else {
@@ -199,6 +232,32 @@ public class MainActivityFragment extends Fragment {
 
     }
 
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        String sortOrder = MovieContract.MovieEntry.COLUMN_POPULARITY + " DESC";
+        Uri movieUri = MovieContract.MovieEntry.CONTENT_URI;
+
+       CursorLoader cl =  new CursorLoader(getActivity(),
+                movieUri,
+                FAVORITE_MOVIE_COLUMNS,
+                null,
+                null,
+                sortOrder);
+        return cl;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+       mFavoriteMovieAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mFavoriteMovieAdapter.swapCursor(null);
+
+    }
 }
 
 

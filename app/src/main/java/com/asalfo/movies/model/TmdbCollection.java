@@ -1,4 +1,4 @@
-package com.asalfo.model;
+package com.asalfo.movies.model;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -6,14 +6,14 @@ import java.util.ArrayList;
 /**
  * Created by asalfo on 01/02/16.
  */
-public class MovieCollection {
+public class TmdbCollection <E> {
 
     private int page;
-    private ArrayList<Movie> results;
+    private ArrayList<E> results;
     private BigInteger totalResults;
     private int totalPages;
 
-    public MovieCollection(int page, ArrayList<Movie> results, BigInteger totalResults, int totalPages) {
+    public TmdbCollection(int page, ArrayList<E> results, BigInteger totalResults, int totalPages) {
         this.page = page;
         this.results = results;
         this.totalResults = totalResults;
@@ -28,11 +28,11 @@ public class MovieCollection {
         this.page = page;
     }
 
-    public ArrayList<Movie> getResults() {
+    public ArrayList<E> getResults() {
         return results;
     }
 
-    public void setResults(ArrayList<Movie> results) {
+    public void setResults(ArrayList<E> results) {
         this.results = results;
     }
 

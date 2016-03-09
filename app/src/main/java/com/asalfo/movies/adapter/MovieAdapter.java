@@ -1,4 +1,4 @@
-package com.asalfo.movies;
+package com.asalfo.movies.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -7,7 +7,9 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
-import com.asalfo.model.Movie;
+import com.asalfo.movies.model.Movie;
+import com.asalfo.movies.R;
+import com.asalfo.movies.Utility;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;

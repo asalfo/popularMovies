@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <TextView
+        android:id="@+id/movie_synopsis"
+        style="@style/PrimaryText.Small"
+        android:ellipsize="end"
+        android:lineSpacingMultiplier="@dimen/line_spacing_expanded"
+        android:maxLines="3"
+        android:paddingEnd="@dimen/content_padding"
+        android:paddingStart="@dimen/content_padding" />
+    <View
+        android:id="@+id/video_details_description_gap"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/details_text_descr_bottom_gap" />
+</merge>
