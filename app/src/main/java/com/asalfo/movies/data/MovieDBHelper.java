@@ -34,7 +34,7 @@ public class MovieDBHelper extends SQLiteOpenHelper {
                 MovieEntry.COLUMN_ORIGINAL_TITLE + " TEXT NOT NULL, " +
                 MovieEntry.COLUMN_ORIGINAL_LANGUAGE + " REAL NOT NULL, " +
                 MovieEntry.COLUMN_POSTER_PATH + " TEXT NOT NULL, " +
-                MovieEntry.COLUMN_BACKDROP_PATH + " TEXT NOT NULL, " +
+                MovieEntry.COLUMN_BACKDROP_PATH + " TEXT , " +
                 MovieEntry.COLUMN_OVERVIEW + " TEXT NOT NULL, " +
                 MovieEntry.COLUMN_POPULARITY + " REAL NOT NULL, " +
                 MovieEntry.COLUMN_VOTE_AVERAGE + " REAL NOT NULL, " +
@@ -42,6 +42,7 @@ public class MovieDBHelper extends SQLiteOpenHelper {
                 MovieEntry.COLUMN_RELEASE_DATE + " TEXT NOT NULL, " +
                 MovieEntry.COLUMN_HOMEPAGE + " TEXT, " +
                 MovieEntry.COLUMN_TAGLINE + " TEXT, " +
+                MovieEntry.COLUMN_RUNTIME + " INTEGER, " +
                 MovieEntry.COLUMN_BUDGET + " DOUBLE, " +
                 MovieEntry.COLUMN_REVENUE + " DOUBLE, " +
                 MovieEntry.COLUMN_FAVORITE + " BOOL " +

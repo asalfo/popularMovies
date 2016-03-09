@@ -24,6 +24,7 @@ import com.asalfo.movies.data.MovieContract;
 import com.asalfo.movies.model.Movie;
 import com.asalfo.movies.model.TmdbCollection;
 import com.asalfo.movies.service.ApiService;
+import com.asalfo.movies.service.MovieSyncAdapter;
 import com.asalfo.movies.service.ServiceGenerator;
 
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     int mNextPage;
     Boolean mUserScrolled = false;
     private MovieAdapter mMovieAdapter;
-    private FavoriteMovieAdapter mFavoriteMovieAdapter;
+
     private ArrayList<Movie> mMovieList;
     private int mPosition = GridView.INVALID_POSITION;
     private String mSortValue;
@@ -110,8 +111,8 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mMovieAdapter = new MovieAdapter(getActivity(), 0, mMovieList);
-         mFavoriteMovieAdapter = new FavoriteMovieAdapter(getActivity(), null, 0);
+
+         mMovieAdapter = new MovieAdapter(getActivity(), null, 0);
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
@@ -119,17 +120,24 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         mProgressBar.setVisibility(View.GONE);
 
         mGridView = (GridView) rootView.findViewById(R.id.gridview);
-        mGridView.setAdapter(mFavoriteMovieAdapter);
+        mGridView.setAdapter(mMovieAdapter);
         //mGridView.setAdapter(mMovieAdapter);
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Movie movie = mMovieAdapter.getItem(position);
+
+                // CursorAdapter returns a cursor at the correct position for getItem(), or null
+                // if it cannot seek to that position.
+                Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
+                if (cursor != null) {
+//                    Intent intent = new Intent(getActivity(), DetailActivity.class)
+//                            .putExtra("movie", movie);
+//                    startActivity(intent);
+                }
                 mPosition = position;
-                Intent intent = new Intent(getActivity(), DetailActivity.class)
-                        .putExtra("movie", movie);
-                startActivity(intent);
+
+
 
             }
         });
@@ -145,28 +153,28 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
             mPosition = savedInstanceState.getInt(SELECTED_KEY);
         }
 
-        mGridView.setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-                if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
-                    mUserScrolled = true;
-
-                }
-            }
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if (mUserScrolled
-                        && firstVisibleItem + visibleItemCount == totalItemCount) {
-                    mUserScrolled = false;
-                    mNextPage++;
-                    Log.d(LOG_TAG, "onScroll Movie Page to be loaded !" + mNextPage);
-                    updateMovie();
-
-                }
-
-            }
-        });
+//        mGridView.setOnScrollListener(new AbsListView.OnScrollListener() {
+//            @Override
+//            public void onScrollStateChanged(AbsListView view, int scrollState) {
+//                if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
+//                    mUserScrolled = true;
+//
+//                }
+//            }
+//
+//            @Override
+//            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+//                if (mUserScrolled
+//                        && firstVisibleItem + visibleItemCount == totalItemCount) {
+//                    mUserScrolled = false;
+//                    mNextPage++;
+//                    Log.d(LOG_TAG, "onScroll Movie Page to be loaded !" + mNextPage);
+//                    updateMovie();
+//
+//                }
+//
+//            }
+//        });
 
         return rootView;
     }
@@ -180,57 +188,59 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     }
 
     private void updateMovie() {
-        String sort_value = Utility.getPreferredSortBy(getActivity());
-        if (sort_value != null && !sort_value.equals(mSortValue)) {
-            mMovieAdapter.clear();
-            mNextPage = 1;
-            mCurrentPage = 0;
-            mSortValue = sort_value;
-        }
-        if (mCurrentPage != mNextPage) {
-            mProgressBar.setVisibility(View.VISIBLE);
-//            FetchMovieTask mMovieTask = new FetchMovieTask();
-//            mMovieTask.execute(sort_value);
-            //fetchMovies(sort_value, mNextPage);
-        }
-        Log.d(LOG_TAG, "Called updateMovie!" + sort_value);
-        Log.d(LOG_TAG, "Called updateMovie!" + mSortValue);
+//        String sort_value = Utility.getPreferredSortBy(getActivity());
+//        if (sort_value != null && !sort_value.equals(mSortValue)) {
+//            mMovieAdapter.clear();
+//            mNextPage = 1;
+//            mCurrentPage = 0;
+//            mSortValue = sort_value;
+//        }
+//        if (mCurrentPage != mNextPage) {
+//            mProgressBar.setVisibility(View.VISIBLE);
+////            FetchMovieTask mMovieTask = new FetchMovieTask();
+////            mMovieTask.execute(sort_value);
+//            //fetchMovies(sort_value, mNextPage);
+//        }
+//        Log.d(LOG_TAG, "Called updateMovie!" + sort_value);
+//        Log.d(LOG_TAG, "Called updateMovie!" + mSortValue);
+        MovieSyncAdapter.syncImmediately(getActivity());
+
     }
 
     @Override
     public void onStart() {
         super.onStart();
        // updateMovie();
-        if (mPosition != GridView.INVALID_POSITION) {
-            mGridView.smoothScrollToPosition(mPosition);
-            Log.d(LOG_TAG, "Movie Current position!" + mPosition);
-        }
+//        if (mPosition != GridView.INVALID_POSITION) {
+//            mGridView.smoothScrollToPosition(mPosition);
+//            Log.d(LOG_TAG, "Movie Current position!" + mPosition);
+//        }
     }
 
 
-    public void fetchMovies(String sort, int page) {
-        Call<TmdbCollection<Movie>> call = apiService.getMovies(sort, page, BuildConfig.THE_MOVIE_DB_API_KEY);
-        call.enqueue(new Callback<TmdbCollection<Movie>>() {
-            @Override
-            public void onResponse(Response<TmdbCollection<Movie>> response) {
-                if (response.isSuccess()) {
-                    TmdbCollection<Movie> collection = response.body();
-                    mMovieAdapter.addAll(collection.getResults());
-                    mCurrentPage = mNextPage;
-                } else {
-                    Log.d(LOG_TAG, "Faill");
-                }
-
-                mProgressBar.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                Log.d(LOG_TAG, t.getMessage());
-            }
-        });
-
-    }
+//    public void fetchMovies(String sort, int page) {
+//        Call<TmdbCollection<Movie>> call = apiService.getShortedMovies(sort, page, BuildConfig.THE_MOVIE_DB_API_KEY);
+//        call.enqueue(new Callback<TmdbCollection<Movie>>() {
+//            @Override
+//            public void onResponse(Response<TmdbCollection<Movie>> response) {
+//                if (response.isSuccess()) {
+//                    TmdbCollection<Movie> collection = response.body();
+//                    mMovieAdapter.addAll(collection.getResults());
+//                    mCurrentPage = mNextPage;
+//                } else {
+//                    Log.d(LOG_TAG, "Faill");
+//                }
+//
+//                mProgressBar.setVisibility(View.GONE);
+//            }
+//
+//            @Override
+//            public void onFailure(Throwable t) {
+//                Log.d(LOG_TAG, t.getMessage());
+//            }
+//        });
+//
+//    }
 
 
     @Override
@@ -250,12 +260,12 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-       mFavoriteMovieAdapter.swapCursor(data);
+       mMovieAdapter.swapCursor(data);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        mFavoriteMovieAdapter.swapCursor(null);
+        mMovieAdapter.swapCursor(null);
 
     }
 }

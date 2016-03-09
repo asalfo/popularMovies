@@ -15,7 +15,8 @@ import retrofit2.http.Query;
  */
 public interface ApiService {
     @GET("discover/movie")
-    Call<TmdbCollection<Movie>> getMovies(@Query("sort_by") String sort, @Query("page") int page, @Query("api_key") String api_key);
+    Call<TmdbCollection<Movie>> getMovies(@Query("page") int page, @Query("api_key") String api_key);
+    Call<TmdbCollection<Movie>> getShortedMovies(@Query("sort_by") String sort, @Query("page") int page, @Query("api_key") String api_key);
 
     @GET("movie/{id}")
     Call<Movie> getMovie(@Path("id") String id,@Query("api_key") String api_key);

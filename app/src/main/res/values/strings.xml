@@ -115,6 +115,7 @@
     </string>
     <string name="title_activity_reviews">Reviews</string>
     <string name="content_authority">com.asalfo.movies</string>
+    <string name="sync_account_type">movies.asalfo.com</string>
 
 
 </resources>
