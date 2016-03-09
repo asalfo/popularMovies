@@ -11,16 +11,20 @@ public class Movie implements Parcelable {
     private String title;
     private String originalTitle;
     private String originalLanguage;
+    private String homepage;
     private String posterPath;
     private String backdropPath;
     private String overview;
-    private int[] genreIds;
+    private String tagTine;
     private float popularity;
     private Float voteAverage;
-    private String releaseDate;
-    private Boolean video;
-    private Boolean adult;
     private int voteCount;
+    private String releaseDate;
+    private int runtine;
+    private double budget;
+    private double revenue;
+    private Boolean favorite;
+
 
     public static final Parcelable.Creator<Movie> CREATOR
             = new Parcelable.Creator<Movie>() {
@@ -37,9 +41,9 @@ public class Movie implements Parcelable {
     }
 
     public Movie(String id, String title, String originalTitle, String originalLanguage,
-                 String posterPath, String backdropPath, String overview, int[] genreIds,
-                 float popularity, Float voteAverage, String releaseDate, Boolean video,
-                 Boolean adult, int voteCount) {
+                 String posterPath, String backdropPath, String overview,
+                 float popularity, Float voteAverage, String releaseDate,
+                 int voteCount) {
         this.id = id;
         this.title = title;
         this.originalTitle = originalTitle;
@@ -47,12 +51,9 @@ public class Movie implements Parcelable {
         this.posterPath = posterPath;
         this.backdropPath = backdropPath;
         this.overview = overview;
-        this.genreIds = genreIds;
         this.popularity = popularity;
         this.voteAverage = voteAverage;
         this.releaseDate = releaseDate;
-        this.video = video;
-        this.adult = adult;
         this.voteCount = voteCount;
     }
 
@@ -75,7 +76,34 @@ public class Movie implements Parcelable {
         this.voteAverage = in.readFloat();
         this.voteCount = in.readInt();
         this.popularity = in.readFloat();
-        //this.video = in.readByte() != 0;
+        this.homepage = in.readString();
+        this.backdropPath = in.readString();
+        this.tagTine = in.readString();
+        this.runtine = in.readInt();
+        this.budget = in.readDouble();
+        this.revenue = in.readDouble();
+        this.favorite = in.readInt() != 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(title);
+        dest.writeString(originalTitle);
+        dest.writeString(posterPath);
+        dest.writeString(overview);
+        dest.writeString(releaseDate);
+        dest.writeFloat(voteAverage);
+        dest.writeInt(voteCount);
+        dest.writeFloat(popularity);
+        dest.writeString(homepage);
+        dest.writeString(backdropPath);
+        dest.writeString(tagTine);
+        dest.writeInt(runtine);
+        dest.writeDouble(budget);
+        dest.writeDouble(revenue);
+        dest.writeInt(favorite ?1:0);
+
     }
 
     @Override
@@ -90,20 +118,6 @@ public class Movie implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(id);
-        dest.writeString(title);
-        dest.writeString(originalTitle);
-        dest.writeString(posterPath);
-        dest.writeString(overview);
-        dest.writeString(releaseDate);
-        dest.writeFloat(voteAverage);
-        dest.writeInt(voteCount);
-        dest.writeFloat(popularity);
-        //dest.writeByte((byte) (video ? 1 : 0));
     }
 
     public String getId() {
@@ -162,12 +176,12 @@ public class Movie implements Parcelable {
         this.overview = overview;
     }
 
-    public int[] getGenreIds() {
-        return genreIds;
+    public String getTagTine() {
+        return tagTine;
     }
 
-    public void setGenreIds(int[] genreIds) {
-        this.genreIds = genreIds;
+    public void setTagTine(String tagTine) {
+        this.tagTine = tagTine;
     }
 
     public float getPopularity() {
@@ -194,22 +208,6 @@ public class Movie implements Parcelable {
         this.releaseDate = releaseDate;
     }
 
-    public Boolean getVideo() {
-        return video;
-    }
-
-    public void setVideo(Boolean video) {
-        this.video = video;
-    }
-
-    public Boolean getAdult() {
-        return adult;
-    }
-
-    public void setAdult(Boolean adult) {
-        this.adult = adult;
-    }
-
     public int getVoteCount() {
         return voteCount;
     }
@@ -218,12 +216,50 @@ public class Movie implements Parcelable {
         this.voteCount = voteCount;
     }
 
+
+    public String getHomepage() {
+        return homepage;
+    }
+
+    public void setHomepage(String homepage) {
+        this.homepage = homepage;
+    }
+
+    public int getRuntine() {
+        return runtine;
+    }
+
+    public void setRuntine(int runtine) {
+        this.runtine = runtine;
+    }
+
+    public double getBudget() {
+        return budget;
+    }
+
+    public void setBudget(double budget) {
+        this.budget = budget;
+    }
+
+    public double getRevenue() {
+        return revenue;
+    }
+
+    public void setRevenue(double revenue) {
+        this.revenue = revenue;
+    }
+
+    public Boolean isFavorite() {
+        return favorite;
+    }
+
+    public void setFavorite(Boolean favorite) {
+        this.favorite = favorite;
+    }
+
     public String getYear(){
         String[] parts = this.releaseDate.split("-");
         return parts[0];
     }
 
-    public  String getGenres(){
-        return "movie";
-    }
 }
