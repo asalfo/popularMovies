@@ -65,6 +65,9 @@ public class MovieContract {
         public static Uri buildMovieUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
+        public static String getMovieIdFromUri(Uri uri){
+            return uri.getPathSegments().get(1);
+        }
     }
 
     /* Inner class that defines the table contents of the videp table */

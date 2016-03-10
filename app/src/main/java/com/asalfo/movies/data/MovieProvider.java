@@ -14,6 +14,7 @@ public class MovieProvider extends ContentProvider {
     private MovieDBHelper mDBHelper;
 
     static final int MOVIE = 100;
+    static final int VIDEO_WITH_ID =101;
     static final int VIDEO = 200;
     static final int VIDEO_WITH_MOVIE = 201;
     static final int REVIEW = 300;
@@ -50,6 +51,11 @@ public class MovieProvider extends ContentProvider {
 
 
     //video.movie_id = ?
+    private static final String sMovieSelection =
+            MovieContract.MovieEntry.TABLE_NAME+
+                    "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ? ";
+
+    //video.movie_id = ?
     private static final String sVideoMovieSelection =
             MovieContract.VideoEntry.TABLE_NAME+
                     "." + MovieContract.VideoEntry.COLUMN_MOVIE_ID + " = ? ";
@@ -77,6 +83,26 @@ public class MovieProvider extends ContentProvider {
         selectionArgs = new String[]{movie_id};
 
         return sFavoitreQueryBuilder.query(mDBHelper.getReadableDatabase(),
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                sortOrder
+        );
+    }
+
+
+    private Cursor getMovie(Uri uri, String[] projection, String sortOrder) {
+        String movie_id = MovieContract.MovieEntry.getMovieIdFromUri(uri);
+
+        String[] selectionArgs;
+        String selection;
+
+        selection = sMovieSelection;
+        selectionArgs = new String[]{movie_id};
+
+        return sMovieQueryBuilder.query(mDBHelper.getReadableDatabase(),
                 projection,
                 selection,
                 selectionArgs,
@@ -133,6 +159,7 @@ public class MovieProvider extends ContentProvider {
 
         // For each type of URI you want to add, create a corresponding code.
         matcher.addURI(authority, MovieContract.PATH_MOVIE, MOVIE);
+        matcher.addURI(authority, MovieContract.PATH_MOVIE + "/*", VIDEO_WITH_ID);
 
         matcher.addURI(authority, MovieContract.PATH_FAVORITE, FAVORITE);
 
@@ -195,6 +222,12 @@ public class MovieProvider extends ContentProvider {
                         null,
                         sortOrder
                 );
+                break;
+            }
+            // "movie/*"
+            case VIDEO_WITH_ID:
+            {
+                retCursor = getMovie(uri, projection, sortOrder);
                 break;
             }
             // "movie"

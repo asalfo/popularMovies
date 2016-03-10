@@ -33,7 +33,7 @@ public class ReviewsActivityFragment extends Fragment {
     private ReviewAdapter mReviewAdapter;
     private String mMovieTitle;
     private String mMovieId;
-    private ArrayList<Review> mReviews = new ArrayList<Review>();
+    private ArrayList<Review> mReviews ;
 
 
     public ReviewsActivityFragment() {
@@ -45,9 +45,9 @@ public class ReviewsActivityFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent intent = getActivity().getIntent();
-        if (intent != null && intent.hasExtra("movie_id")) {
-            mMovieId = intent.getStringExtra("movie_id");
-            retreiveReview(mMovieId);
+        if (intent != null && intent.hasExtra(DetailActivityFragment.REVIEWS_KEY)) {
+            mReviews = intent.getParcelableArrayListExtra(DetailActivityFragment.REVIEWS_KEY);
+
 
         }
     }
@@ -67,34 +67,14 @@ public class ReviewsActivityFragment extends Fragment {
 
     }
 
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (mReviews != null && mReviews.size() != 0) {
+            mReviewAdapter.swapData(mReviews);
 
-
-    private void retreiveReview(String video_id){
-
-        Call<TmdbCollection<Review>> call = apiService.getReviews(video_id, BuildConfig.THE_MOVIE_DB_API_KEY);
-        call.enqueue(new Callback<TmdbCollection<Review>>() {
-            @Override
-            public void onResponse(Response<TmdbCollection<Review>> response) {
-                if (response.isSuccess()) {
-                    TmdbCollection<Review> collection = response.body();
-                    mReviews.addAll(collection.getResults());
-                    if (mReviews != null && mReviews.size() != 0) {
-                        mReviewAdapter.swapData(mReviews);
-
-                    }
-
-                } else {
-                    Log.d(LOG_TAG, "Faill");
-                }
-
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                Log.d(LOG_TAG, t.getMessage());
-            }
-        });
-
+        }
     }
+
 
 }

@@ -38,6 +38,8 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
     public static final String ACTION_DATA_UPDATED =
             "com.asalfo.movies.ACTION_DATA_UPDATED";
     public static final int MAX_PAGES = 20;
+    private static final int DEFAULT_VOTE_COUNT = 500;
+    private static final String DEFAULT_SELECTION = "popularity.desc";
     // Interval at which to sync with the the movie api, in seconds.
     // 60 seconds (1 minute) * 180 = 3 hours
     public static final int SYNC_INTERVAL = 60 * 180;
@@ -154,10 +156,10 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         Log.d(LOG_TAG, "Starting sync");
-
+        // query
         for (int page = 1; page <= MAX_PAGES; page++) {
 
-            Call<TmdbCollection<Movie>> call = apiService.getMovies(page, BuildConfig.THE_MOVIE_DB_API_KEY);
+            Call<TmdbCollection<Movie>> call = apiService.getDiscoverMovies(DEFAULT_VOTE_COUNT,DEFAULT_SELECTION,page, BuildConfig.THE_MOVIE_DB_API_KEY);
             TmdbCollection<Movie> collection;
             try {
                 collection = call.execute().body();

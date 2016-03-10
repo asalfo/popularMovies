@@ -118,4 +118,11 @@
     <string name="sync_account_type">movies.asalfo.com</string>
 
 
+    <string name="empty_movie_list">No Movie Information Available</string>
+    <string name="empty_movie_list_no_network">No Movie information available. The network is not available to fetch movie data.</string>
+    <string name="empty_movie_list_server_down">No Movie information available. The server is not returning data.</string>
+
+
+
+
 </resources>

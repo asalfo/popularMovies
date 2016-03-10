@@ -45,8 +45,9 @@ public class MovieDBHelper extends SQLiteOpenHelper {
                 MovieEntry.COLUMN_RUNTIME + " INTEGER, " +
                 MovieEntry.COLUMN_BUDGET + " DOUBLE, " +
                 MovieEntry.COLUMN_REVENUE + " DOUBLE, " +
-                MovieEntry.COLUMN_FAVORITE + " BOOL " +
-                " );";
+                MovieEntry.COLUMN_FAVORITE + " BOOL ," +
+                " UNIQUE (" + MovieEntry.COLUMN_MOVIE_ID + ", " +
+                MovieEntry.COLUMN_MOVIE_TITLE + ") ON CONFLICT REPLACE);";
 
 
         // Create a table to hold trailers.

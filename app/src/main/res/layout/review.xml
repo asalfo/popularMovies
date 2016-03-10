@@ -11,7 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="@dimen/TitleSummaryItemPaddingBottom">
+        android:layout_marginBottom="@dimen/TitleSummaryItemPaddingBottom"
+        android:visibility="gone">
 
         <ImageView
             android:id="@+id/ic_review"
@@ -26,15 +27,27 @@
             android:src="@drawable/ic_review" />
 
         <TextView
+            android:id="@+id/review_count"
             style="@style/Text.Subhead.Bold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_toRightOf="@id/ic_review"
             android:lineSpacingMultiplier="0.85"
-            android:text="Reviews"
+            android:text="7.5"
+            android:paddingRight="4dp" />
+
+
+        <TextView
+            style="@style/Text.Subhead.Bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@id/ic_review"
+            android:lineSpacingMultiplier="0.85"
+            android:text="Review(s)"
             android:paddingRight="4dp"
-            android:layout_marginTop="10dip" />
+            android:layout_marginTop="20dip" />
 
     </RelativeLayout>
 </LinearLayout>

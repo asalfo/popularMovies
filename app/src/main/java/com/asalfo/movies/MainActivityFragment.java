@@ -1,16 +1,25 @@
 package com.asalfo.movies;
 
-import android.content.Intent;
+import android.app.Activity;
+import android.content.SharedPreferences;
+import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -18,26 +27,20 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ProgressBar;
 
-import com.asalfo.movies.adapter.FavoriteMovieAdapter;
 import com.asalfo.movies.adapter.MovieAdapter;
 import com.asalfo.movies.data.MovieContract;
 import com.asalfo.movies.model.Movie;
-import com.asalfo.movies.model.TmdbCollection;
 import com.asalfo.movies.service.ApiService;
 import com.asalfo.movies.service.MovieSyncAdapter;
 import com.asalfo.movies.service.ServiceGenerator;
 
 import java.util.ArrayList;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class MainActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> ,SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String LOG_TAG = MainActivityFragment.class.getSimpleName();
 
     public static final ApiService apiService = ServiceGenerator.createService(ApiService.class);
@@ -45,7 +48,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     public static final String NEXT_PAGE_KEY = "next_page";
     private static final String SELECTED_KEY = "selected_position";
     private static final String MOVIE_LIST_KEY = "movie_list";
-    GridView mGridView;
+    RecyclerView mRecyclerView;
     ProgressBar mProgressBar;
     SwipeRefreshLayout mSwipeLayout;
     int mCurrentPage;
@@ -56,9 +59,13 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     private ArrayList<Movie> mMovieList;
     private int mPosition = GridView.INVALID_POSITION;
     private String mSortValue;
+    private int mChoiceMode;
+    private boolean mAutoSelectView;
+    private boolean mHoldForTransition;
+    private long mInitialSelectedDate = -1;
 
 
-    private static final int FAVORITE_MOVIE_LOADER = 0;
+    private static final int MOVIE_LOADER = 0;
 
     private static final String[] FAVORITE_MOVIE_COLUMNS = {
             MovieContract.MovieEntry._ID,
@@ -73,12 +80,24 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     public static final int COLUMN_BACKDROP_PATH  = 3;
 
 
+    /**
+     * A callback interface that all activities containing this fragment must
+     * implement. This mechanism allows activities to be notified of item
+     * selections.
+     */
+    public interface Callback {
+        /**
+         * DetailActivityFragmentCallback for when an item has been selected.
+         */
+        public void onItemSelected(Uri uri, MovieAdapter.MovieAdapterViewHolder vh);
+    }
     public MainActivityFragment() {
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         if (savedInstanceState == null || !savedInstanceState.containsKey(MOVIE_LIST_KEY)) {
             mMovieList = new ArrayList<Movie>();
             mCurrentPage = 0;
@@ -88,7 +107,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
             mCurrentPage = savedInstanceState.getInt(CURRENT_PAGE_KEY);
             mNextPage = savedInstanceState.getInt(NEXT_PAGE_KEY);
         }
-        mSortValue = Utility.getPreferredSortBy(getActivity());
+        mSortValue = Utility.getPreferredSelection(getActivity());
     }
 
     @Override
@@ -109,72 +128,58 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     }
 
     @Override
+    public void onInflate(Activity activity, AttributeSet attrs, Bundle savedInstanceState) {
+        super.onInflate(activity, attrs, savedInstanceState);
+        TypedArray a = activity.obtainStyledAttributes(attrs, R.styleable.MainActivityFragment,
+                0, 0);
+        mChoiceMode = a.getInt(R.styleable.MainActivityFragment_android_choiceMode, AbsListView.CHOICE_MODE_NONE);
+        mAutoSelectView = a.getBoolean(R.styleable.MainActivityFragment_android_choiceMode, false);
+        mHoldForTransition = a.getBoolean(R.styleable.MainActivityFragment_android_choiceMode, false);
+        a.recycle();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-         mMovieAdapter = new MovieAdapter(getActivity(), null, 0);
+
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        mProgressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
-        mProgressBar.setIndeterminate(true);
-        mProgressBar.setVisibility(View.GONE);
 
-        mGridView = (GridView) rootView.findViewById(R.id.gridview);
-        mGridView.setAdapter(mMovieAdapter);
-        //mGridView.setAdapter(mMovieAdapter);
-        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerview_poster);
 
+        View emptyView = rootView.findViewById(R.id.recyclerview_poster_empty);
+
+
+
+
+        // Set the layout manager
+        mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(),3));
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        mRecyclerView.setHasFixedSize(true);
+
+        mMovieAdapter = new MovieAdapter(getActivity(), new MovieAdapter.MovieAdapterOnClickHandler() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-
-                // CursorAdapter returns a cursor at the correct position for getItem(), or null
-                // if it cannot seek to that position.
-                Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
-                if (cursor != null) {
-//                    Intent intent = new Intent(getActivity(), DetailActivity.class)
-//                            .putExtra("movie", movie);
-//                    startActivity(intent);
-                }
-                mPosition = position;
-
-
-
+            public void onClick(Long id, MovieAdapter.MovieAdapterViewHolder vh) {
+           ((Callback) getActivity())
+                        .onItemSelected(MovieContract.MovieEntry.buildMovieUri(id),
+                                vh
+                        );
             }
-        });
+        }, emptyView, mChoiceMode);
 
-        // If there's instance state, mine it for useful information.
-        // The end-goal here is that the user never knows that turning their device sideways
-        // does crazy lifecycle related things.  It should feel like some stuff stretched out,
-        // or magically appeared to take advantage of room, but data or place in the app was never
-        // actually *lost*.
+        // specify an adapter (see also next example)
+        mRecyclerView.setAdapter(mMovieAdapter);
+
+
         if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
-            // The listview probably hasn't even been populated yet.  Actually perform the
-            // swapout in onLoadFinished.
-            mPosition = savedInstanceState.getInt(SELECTED_KEY);
+            if (savedInstanceState != null) {
+                mMovieAdapter.onRestoreInstanceState(savedInstanceState);
+            }
         }
 
-//        mGridView.setOnScrollListener(new AbsListView.OnScrollListener() {
-//            @Override
-//            public void onScrollStateChanged(AbsListView view, int scrollState) {
-//                if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
-//                    mUserScrolled = true;
-//
-//                }
-//            }
-//
-//            @Override
-//            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-//                if (mUserScrolled
-//                        && firstVisibleItem + visibleItemCount == totalItemCount) {
-//                    mUserScrolled = false;
-//                    mNextPage++;
-//                    Log.d(LOG_TAG, "onScroll Movie Page to be loaded !" + mNextPage);
-//                    updateMovie();
-//
-//                }
-//
-//            }
-//        });
+
 
         return rootView;
     }
@@ -183,12 +188,34 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         Log.d(LOG_TAG, "Called onActivityCreated!");
-        getLoaderManager().initLoader(FAVORITE_MOVIE_LOADER, null, this);
+        getLoaderManager().initLoader(MOVIE_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
     }
 
+    @Override
+    public void onResume() {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        sp.registerOnSharedPreferenceChangeListener(this);
+        super.onResume();
+    }
+
+
+    // since we read the location when we create the loader, all we need to do is restart things
+    void onSelectionChanged() {
+        getLoaderManager().restartLoader(MOVIE_LOADER, null, this);
+    }
+
+    @Override
+    public void onPause() {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        sp.unregisterOnSharedPreferenceChangeListener(this);
+        super.onPause();
+    }
+
+
+
     private void updateMovie() {
-//        String sort_value = Utility.getPreferredSortBy(getActivity());
+//        String sort_value = Utility.getPreferredSelection(getActivity());
 //        if (sort_value != null && !sort_value.equals(mSortValue)) {
 //            mMovieAdapter.clear();
 //            mNextPage = 1;
@@ -266,6 +293,11 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mMovieAdapter.swapCursor(null);
+
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 
     }
 }

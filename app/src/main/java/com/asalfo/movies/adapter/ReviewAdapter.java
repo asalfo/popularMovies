@@ -68,7 +68,10 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        return mDataset.size();
+        if(mDataset != null){
+         return mDataset.size();
+        }
+        return 0;
     }
 
   public void swapData( ArrayList<Review> data){
