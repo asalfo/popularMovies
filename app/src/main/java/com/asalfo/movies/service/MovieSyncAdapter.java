@@ -42,8 +42,8 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final String DEFAULT_SELECTION = "popularity.desc";
     // Interval at which to sync with the the movie api, in seconds.
     // 60 seconds (1 minute) * 180 = 3 hours
-    public static final int SYNC_INTERVAL = 60 * 180;
-    public static final int SYNC_FLEXTIME = SYNC_INTERVAL / 3;
+    public static final int SYNC_INTERVAL = 60 * 5;
+    public static final int SYNC_FLEXTIME = SYNC_INTERVAL / 5;
     private static final long DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
     private static final int WEATHER_NOTIFICATION_ID = 3004;
     private static final String[] FAVORITE_MOVIE_PROJECTION = new String[]{

@@ -28,7 +28,7 @@ import java.util.ArrayList;
  */
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder> {
 
-    public static final String LOG_TAG = FavoriteMovieAdapter.class.getSimpleName();
+    public static final String LOG_TAG = MovieAdapter.class.getSimpleName();
     private Cursor mCursor;
     final private Context mContext;
     final private MovieAdapterOnClickHandler mClickHandler;
@@ -83,7 +83,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     @Override
     public void onBindViewHolder(MovieAdapterViewHolder holder, int position) {
         mCursor.moveToPosition(position);
-        int movieId = mCursor.getInt(MainActivityFragment.COLUMN_MOVIE_ID);
         String posterPath = mCursor.getString(MainActivityFragment.COLUMN_POSTER_PATH);
         String thumbnailUrl = Utility.generatePosterUrl(posterPath, "w92");
 
