@@ -34,7 +34,7 @@
             android:launchMode="singleTop"
             android:label="@string/title_activity_detail"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/MovieAppDetailTheme">
+            android:theme="@style/MovieAppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.asalfo.movies.MainActivity" />
@@ -42,6 +42,7 @@
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_preference"
+            android:theme="@style/MovieAppTheme"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -49,7 +50,7 @@
         </activity>
         <activity
             android:name=".ReviewsActivity"
-            android:theme="@style/MovieReviewsTheme"
+            android:theme="@style/MovieAppTheme"
             android:label="@string/title_activity_reviews">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

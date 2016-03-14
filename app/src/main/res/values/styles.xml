@@ -7,44 +7,24 @@
 
     <style name="Theme.Default" parent="@style/Theme.AppCompat.NoActionBar">
         <item name="android:textColorPrimary">@color/primary_text_color</item>
-        <item name="android:windowBackground">@drawable/bg_img</item>
-        <item name="android:progressBarStyle">@style/ProgressBar</item>
-        <item name="android:actionBarStyle">@style/Widget.Styled.ActionBar</item>
-        <item name="toolbarBackground">@drawable/action_bar_bg</item>
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>
         <item name="colorAccent">@color/accent</item>
     </style>
 
-    <style name="Theme.ActionBarOverlay" parent="@style/Theme.Default">
-        <item name="android:windowActionBarOverlay">true</item>
+    <style name="MovieAppDetailTheme" parent="Theme.Default">
     </style>
 
-    <style name="MovieAppDetailTheme" parent="Theme.ActionBarOverlay">
-        <item name="imageBackgroundColor">@color/text_view_background</item>
-        <item name="imageBackgroundStroke">@drawable/image_frame_light</item>
-        <item name="backdropActionbarGradient">@drawable/ab_gradient</item>
-    </style>
 
-    <style name="MovieReviewsTheme" parent="@style/Theme.AppCompat">
-        <item name="colorPrimary">@color/primary</item>
-        <item name="colorPrimaryDark">@color/primary_dark</item>
-        <item name="colorAccent">@color/accent</item>
-    </style>
     <!-- Settings activity theme. -->
     <style name="SettingsTheme" parent="Theme.Default"></style>
-
-    <style name="ProgressBar" parent="@android:style/Widget.ProgressBar">
-        <item name="android:indeterminateDrawable">@drawable/progress_medium_no_bg</item>
-    </style>
 
 
     <style name="Widget.Styled.ActionBar" parent="@android:style/Widget.ActionBar">
         <item name="android:icon">@android:color/transparent</item>
         <item name="android:background">@color/black</item>
         <item name="android:padding">0.0dip</item>
-        <item name="android:displayOptions">showHome|useLogo</item>
-        <item name="android:actionMenuTextAppearance">@style/Widget.Styled.ActionBar.MenuTextStyle</item>
+
     </style>
 
     <style name="Widget.Styled.ActionBar.MenuTextStyle" parent="@style/wrap">
@@ -96,41 +76,6 @@
         <item name="android:textSize">@dimen/text_small</item>
     </style>
 
-    <style name="Button" parent="@style/wrap">
-        <item name="android:textSize">@dimen/text_medium</item>
-        <item name="android:textColor">@color/selectable_text_light_to_dark</item>
-        <item name="android:paddingLeft">@dimen/button_padding</item>
-        <item name="android:paddingRight">@dimen/button_padding</item>
-        <item name="android:minHeight">@dimen/button_min_height</item>
-    </style>
-    <!-- Style for forecast listview -->
-    <style name="MovietListStyle">
-        <!-- Here it's a stub.  In screens of sufficient width, this style includes modifications
-        for two-pane layout -->
-    </style>
-
-    <style name="PortraitBackdrop">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:scaleType">centerCrop</item>
-    </style>
-
-
-    <style name="ImageCoverStroke">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:scaleType">centerCrop</item>
-        <item name="android:layout_alignParentTop">true</item>
-    </style>
-
-    <style name="ImageCover">
-        <item name="android:background">?imageBackgroundColor</item>
-        <item name="android:padding">@dimen/cover_frame</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_alignParentTop">true</item>
-    </style>
-
 
     <style name="match">
         <item name="android:layout_width">match_parent</item>
@@ -141,7 +86,8 @@
         <item name="android:windowExitAnimation">@null</item>
     </style>
 
-    <style name="IconFontBasic" parent="@style/IconFontBasic.NoShadow">
+    <style name="IconFontBasic" parent="@style/wrap">
+        <item name="android:textColor">@color/white</item>
         <item name="android:padding">1.0dip</item>
         <item name="android:shadowColor">@color/black</item>
         <item name="android:shadowDx">0.0</item>
@@ -152,16 +98,6 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
-    <style name="StarRatingsBar" parent="@android:style/Widget.RatingBar">
-        <item name="android:maxHeight">@dimen/star_rating_size</item>
-        <item name="android:max">5</item>
-        <item name="android:progressDrawable">@drawable/star_rating</item>
-        <item name="android:minHeight">@dimen/star_rating_size</item>
-        <item name="android:stepSize">0.1</item>
-        <item name="android:isIndicator">false</item>
-        <item name="android:layoutDirection">locale</item>
-        <item name="android:mirrorForRtl">true</item>
-    </style>
 
     <style name="Text">
         <item name="android:textSize">@dimen/text_size_standard</item>
@@ -189,14 +125,5 @@
         <item name="android:textStyle">bold</item>
     </style>
 
-    <style name="CollapsingToolbarLayoutCollapsedTextStyle" parent="MovieAppDetailTheme">
-        <item name="android:textColor">@android:color/transparent</item>
-        <item name="android:textSize">0sp</item>
-    </style>
-    <style name="CollapsingToolbarLayoutExpandedTextStyle" parent="PrimaryText.Large">
-        <item name="android:layout_marginLeft">8.0dp</item>
-        <item name="android:layout_marginTop">8.0dp</item>
-        <item name="android:maxLines">2</item>
-        <item name="android:textStyle">bold</item>
-    </style>
+
 </resources>

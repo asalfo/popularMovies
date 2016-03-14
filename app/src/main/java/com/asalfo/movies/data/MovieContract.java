@@ -68,6 +68,10 @@ public class MovieContract {
         public static String getMovieIdFromUri(Uri uri){
             return uri.getPathSegments().get(1);
         }
+        public static Uri buildFavoriteMoviesUri() {
+            return CONTENT_URI.buildUpon().appendPath("movie")
+                    .appendPath("favorite").build();
+        }
     }
 
     /* Inner class that defines the table contents of the videp table */
@@ -84,7 +88,8 @@ public class MovieContract {
         // Table name
         public static final String TABLE_NAME = "video";
 
-        public static final String COLUMN_MOVIE_ID = "movie_id";
+        public static final String COLUMN_VIDEO_ID = "video_id";
+        public static final String COLUMN_FAVORITE_ID = "favor_id";
         public static final String COLUMN_LANGUAGE = "languague";
         public static final String COLUMN_KEY = "key";
         public static final String COLUMN_NAME = "name";
@@ -96,8 +101,8 @@ public class MovieContract {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
-        public static Uri buildVideoMovie(int movie_id) {
-            return CONTENT_URI.buildUpon().appendPath(Integer.toString(movie_id)).build();
+        public static Uri buildVideoMovie(String movie_id) {
+            return CONTENT_URI.buildUpon().appendPath(movie_id).build();
         }
 
         public static String getVideoMovieIdFromUri(Uri uri) {
@@ -122,7 +127,8 @@ public class MovieContract {
 
         // Table name
         public static final String TABLE_NAME = "review";
-        public static final String COLUMN_MOVIE_ID = "movie_id";
+        public static final String COLUMN_REVIEW_ID = "review_id";
+        public static final String COLUMN_FAVORITE_ID = "favorite_id";
         public static final String COLUMN_AUTHOR = "author";
         public static final String COLUMN_CONTENT = "content";
         public static final String COLUMN_URL = "url";
@@ -133,8 +139,8 @@ public class MovieContract {
         }
 
 
-        public static Uri buildReviewMovie(int movie_id) {
-            return CONTENT_URI.buildUpon().appendPath(Integer.toString(movie_id)).build();
+        public static Uri buildReviewMovie(String movie_id) {
+            return CONTENT_URI.buildUpon().appendPath(movie_id).build();
         }
 
         public static String getReviewMovieIdFromUri(Uri uri) {

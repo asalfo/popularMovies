@@ -19,8 +19,9 @@ public class DetailActivity extends AppCompatActivity {
             // using a fragment transaction.
 
             Bundle arguments = new Bundle();
+            Boolean favorite = getIntent().getBooleanExtra(DetailActivityFragment.FAVORITE, false);
             arguments.putParcelable(DetailActivityFragment.DETAIL_URI, getIntent().getData());
-            //arguments.putBoolean(DetailFragment.DETAIL_TRANSITION_ANIMATION, true);
+            arguments.putBoolean(DetailActivityFragment.FAVORITE,favorite);
 
             DetailActivityFragment fragment = new DetailActivityFragment();
             fragment.setArguments(arguments);

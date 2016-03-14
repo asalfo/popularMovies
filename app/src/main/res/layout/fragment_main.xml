@@ -21,17 +21,9 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:elevation="0dp"
+            android:elevation="4dp"
             app:layout_scrollFlags="scroll|enterAlways"
             app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-            <ImageView
-                android:layout_marginTop="?attr/actionBarSize"
-                android:layout_width="wrap_content"
-                android:layout_height="?attr/listPreferredItemHeight"
-                android:layout_gravity="center_horizontal"
-                android:contentDescription="@string/app_name"
-                android:scaleType="center"
-                android:src="@drawable/ic_logo"/>
         </android.support.v7.widget.Toolbar>
 
     </android.support.design.widget.AppBarLayout>

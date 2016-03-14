@@ -2,58 +2,21 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
-    <dimen name="fab_margin">16dp</dimen>
     <dimen name="text_micro">10.0sp</dimen>
     <dimen name="text_small">14.0sp</dimen>
     <dimen name="text_small_medium">16.0sp</dimen>
     <dimen name="text_large">22.0sp</dimen>
     <dimen name="text_medium">18.0sp</dimen>
     <dimen name="content_padding">8.0dip</dimen>
-    <dimen name="button_min_height">40.0dip</dimen>
-    <dimen name="button_padding">16.0dip</dimen>
     <item name="line_spacing_expanded" type="dimen">1.2</item>
-
-    <dimen name="spacing_xsmall">2dp</dimen>
-    <dimen name="spacing_medium">8dp</dimen>
-    <dimen name="spacing_large">16dp</dimen>
-    <dimen name="spacing_xlarge">32dp</dimen>
-
-    <dimen name="elevation_low">9dp</dimen>
-    <dimen name="elevation_high">12dp</dimen>
-    <dimen name="status_bar_height">25dp</dimen>
-
-    <dimen name="card_height">304dp</dimen>
-    <dimen name="md_keylines">16dp</dimen>
-    <dimen name="tile_padding">8dp</dimen>
-    <dimen name="tile_height">160dp</dimen>
-    <dimen name="article_keylines">72dp</dimen>
-    <dimen name="avator_size">40dp</dimen>
-    <dimen name="card_title_height">40dp</dimen>
-    <dimen name="article_titles">20sp</dimen>
-    <dimen name="cards_button_width">48dp</dimen>
-    <dimen name="cards_button_height">48dp</dimen>
-    <dimen name="article_subheading">16sp</dimen>
-    <dimen name="card_image_height">200dp</dimen>
-    <dimen name="list_body">14sp</dimen>
-    <dimen name="navheader_height">222dp</dimen>
-    <dimen name="text_margin">16dp</dimen>
-    <dimen name="app_bar_height">180dp</dimen>
     <dimen name="double_padding">16.0dip</dimen>
-    <dimen name="cover_margin">4.0dip</dimen>
-    <dimen name="cover_frame">2.0dip</dimen>
-    <dimen name="poster_margin">150dp</dimen>
     <dimen name="cw_play_overlay_size">60.0dip</dimen>
     <dimen name="details_play_overlay_bottom_margin">0.0dip</dimen>
-    <dimen name="details_top_info_margin">180.0dip</dimen>
-    <dimen name="text_padding">4.0dip</dimen>
-    <dimen name="star_rating_size">24.0dip</dimen>
-    <dimen name="detail_horizontal_padding">32dp</dimen>
-    <dimen name="details_text_descr_bottom_gap">@dimen/double_padding</dimen>
     <dimen name="text_size_standard">15.0sp</dimen>
     <dimen name="TitleSummaryItemPaddingBottom">15.0dip</dimen>
     <dimen name="text_size_subhead">16.0sp</dimen>
-    <dimen name="phoneRatingWidgetStarWidth">36.0dip</dimen>
-    <dimen name="phoneRatingWidgetStarHeight">36.0dip</dimen>
+    <dimen name="ratingWidth">36.0dip</dimen>
+    <dimen name="ratingHeight">36.0dip</dimen>
     <dimen name="text_size_body_1">14.0sp</dimen>
     <dimen name="text_size_body_2">14.0sp</dimen>
     <dimen name="text_size_caption">12.0sp</dimen>
@@ -61,10 +24,7 @@
     <dimen name="appbar_elevation">4dp</dimen>
     <dimen name="list_item_extra_padding">0dp</dimen>
     <dimen name="detail_view_padding">@dimen/abc_list_item_padding_horizontal_material</dimen>
-    <dimen name="forecast_detail_padding_wide">16dp</dimen>
     <dimen name="detail_container_bottom_margin">@dimen/detail_view_padding</dimen>
-
     <dimen name="detail_card_elevation">6dp</dimen>
-    <dimen name="landscape_forecast_view_width">360dp</dimen>
     <dimen name="list_icon">40dp</dimen>
 </resources>

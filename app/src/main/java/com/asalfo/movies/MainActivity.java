@@ -57,7 +57,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         }
 
 
-
         MovieSyncAdapter.initializeSyncAdapter(this);
 
     }
@@ -73,12 +72,18 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
     protected void onResume() {
         super.onResume();
         String selection = Utility.getPreferredSelection(this);
-        // update the location in our second pane using the fragment manager
+        // update the user selection in our second pane using the fragment manager
         if (selection != null && !selection.equals(mSelection)) {
-            MainActivityFragment mainActivityFragmentf = (MainActivityFragment)getSupportFragmentManager().findFragmentById(R.id.fragment_forecast);
+            MainActivityFragment mainActivityFragmentf = (MainActivityFragment)getSupportFragmentManager().findFragmentById(R.id.fragment);
             if ( null != mainActivityFragmentf ) {
-                mainActivityFragmentf.onSelectionChanged();
+                mainActivityFragmentf.onSelectionChanged(selection);
             }
+
+            DetailActivityFragment df = (DetailActivityFragment)getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
+            if ( null != df ) {
+                df.onLocationChanged(selection);
+            }
+
 
             mSelection = selection;
         }
@@ -96,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
     }
 
     @Override
-    public void onItemSelected(Uri contentUri, MovieAdapter.MovieAdapterViewHolder vh) {
+    public void onItemSelected(Uri contentUri,Boolean favorite ,MovieAdapter.MovieAdapterViewHolder vh) {
 
         if (mTwoPane) {
             // In two-pane mode, show the detail view in this activity by
@@ -104,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
             // fragment transaction.
             Bundle args = new Bundle();
             args.putParcelable(DetailActivityFragment.DETAIL_URI, contentUri);
+            args.putBoolean(DetailActivityFragment.FAVORITE, favorite);
 
             DetailActivityFragment fragment = new DetailActivityFragment();
             fragment.setArguments(args);
@@ -114,7 +120,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         } else {
 
             Intent intent = new Intent(this, DetailActivity.class)
-                    .setData(contentUri);
+                    .setData(contentUri)
+                    .putExtra(DetailActivityFragment.FAVORITE, favorite);
 
 
             ActivityCompat.startActivity(this, intent,null);

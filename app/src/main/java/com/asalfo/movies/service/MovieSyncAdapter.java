@@ -18,6 +18,7 @@ import android.util.Log;
 
 import com.asalfo.movies.BuildConfig;
 import com.asalfo.movies.R;
+import com.asalfo.movies.Utility;
 import com.asalfo.movies.data.MovieContract;
 import com.asalfo.movies.model.Movie;
 import com.asalfo.movies.model.Review;
@@ -30,22 +31,18 @@ import java.util.Vector;
 
 import retrofit2.Call;
 
-/**
- * Created by asalfo on 09/03/16.
- */
 public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
     public static final ApiService apiService = ServiceGenerator.createService(ApiService.class);
     public static final String ACTION_DATA_UPDATED =
             "com.asalfo.movies.ACTION_DATA_UPDATED";
     public static final int MAX_PAGES = 20;
     private static final int DEFAULT_VOTE_COUNT = 500;
-    private static final String DEFAULT_SELECTION = "popularity.desc";
+    public static final String DEFAULT_SELECTION = "popularity.desc";
     // Interval at which to sync with the the movie api, in seconds.
     // 60 seconds (1 minute) * 180 = 3 hours
-    public static final int SYNC_INTERVAL = 60 * 5;
-    public static final int SYNC_FLEXTIME = SYNC_INTERVAL / 5;
-    private static final long DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
-    private static final int WEATHER_NOTIFICATION_ID = 3004;
+    public static final int SYNC_INTERVAL = 60 * 180;
+    public static final int SYNC_FLEXTIME = SYNC_INTERVAL / 3;
+
     private static final String[] FAVORITE_MOVIE_PROJECTION = new String[]{
             MovieContract.MovieEntry._ID,
             MovieContract.MovieEntry.COLUMN_MOVIE_ID
@@ -156,51 +153,55 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         Log.d(LOG_TAG, "Starting sync");
+        Context context = getContext();
+        String selection = Utility.getPreferredSelection(context);
+        if(selection == "favorite")
+            selection = DEFAULT_SELECTION;
         // query
         for (int page = 1; page <= MAX_PAGES; page++) {
 
-            Call<TmdbCollection<Movie>> call = apiService.getDiscoverMovies(DEFAULT_VOTE_COUNT,DEFAULT_SELECTION,page, BuildConfig.THE_MOVIE_DB_API_KEY);
+            Call<TmdbCollection<Movie>> call = apiService.getDiscoverMovies(DEFAULT_VOTE_COUNT,selection,page, BuildConfig.THE_MOVIE_DB_API_KEY);
             TmdbCollection<Movie> collection;
             try {
                 collection = call.execute().body();
+                if(collection != null) {
+                    Vector<ContentValues> cVVector = new Vector<ContentValues>(collection.getResults().size());
+                    for (Movie movie : collection.getResults()) {
 
-                Vector<ContentValues> cVVector = new Vector<ContentValues>(collection.getResults().size());
-                for (Movie movie : collection.getResults()) {
+
+                        Boolean favorite = mFavoriteIds.contains(movie.getId());
+                        ContentValues movieValues = new ContentValues();
+
+                        // Then add the data, along with the corresponding name of the data type,
+                        // so the content provider knows what kind of value is being inserted.
+                        movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, movie.getId());
+                        movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_TITLE, movie.getTitle());
+                        movieValues.put(MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE, movie.getOriginalTitle());
+                        movieValues.put(MovieContract.MovieEntry.COLUMN_ORIGINAL_LANGUAGE, movie.getOriginalLanguage());
+                        movieValues.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH, movie.getPosterPath());
+                        movieValues.put(MovieContract.MovieEntry.COLUMN_BACKDROP_PATH, movie.getBackdropPath());
+                        movieValues.put(MovieContract.MovieEntry.COLUMN_OVERVIEW, movie.getOverview());
+                        movieValues.put(MovieContract.MovieEntry.COLUMN_POPULARITY, movie.getPopularity());
+                        movieValues.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, movie.getVoteAverage());
+                        movieValues.put(MovieContract.MovieEntry.COLUMN_VOTE_COUNT, movie.getVoteCount());
+                        movieValues.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, movie.getReleaseDate());
+                        movieValues.put(MovieContract.MovieEntry.COLUMN_FAVORITE, favorite);
+
+                        cVVector.add(movieValues);
+                    }
 
 
-                    Boolean favorite = mFavoriteIds.contains(movie.getId());
-                    ContentValues movieValues = new ContentValues();
+                    int inserted = 0;
+                    // add to database
+                    if (cVVector.size() > 0) {
 
-                    // Then add the data, along with the corresponding name of the data type,
-                    // so the content provider knows what kind of value is being inserted.
-                    movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, movie.getId());
-                    movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_TITLE, movie.getTitle());
-                    movieValues.put(MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE, movie.getOriginalTitle());
-                    movieValues.put(MovieContract.MovieEntry.COLUMN_ORIGINAL_LANGUAGE, movie.getOriginalLanguage());
-                    movieValues.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH, movie.getPosterPath());
-                    movieValues.put(MovieContract.MovieEntry.COLUMN_BACKDROP_PATH, movie.getBackdropPath());
-                    movieValues.put(MovieContract.MovieEntry.COLUMN_OVERVIEW, movie.getOverview());
-                    movieValues.put(MovieContract.MovieEntry.COLUMN_POPULARITY, movie.getPopularity());
-                    movieValues.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, movie.getVoteAverage());
-                    movieValues.put(MovieContract.MovieEntry.COLUMN_VOTE_COUNT, movie.getVoteCount());
-                    movieValues.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, movie.getReleaseDate());
-                    movieValues.put(MovieContract.MovieEntry.COLUMN_FAVORITE, favorite);
+                        ContentValues[] cvArray = new ContentValues[cVVector.size()];
+                        cVVector.toArray(cvArray);
+                        getContext().getContentResolver().bulkInsert(MovieContract.MovieEntry.CONTENT_URI, cvArray);
 
-                    cVVector.add(movieValues);
+                    }
+                    Log.d(LOG_TAG, "Sync Complete. " + cVVector.size() + " Inserted");
                 }
-
-                int inserted = 0;
-                // add to database
-                if (cVVector.size() > 0) {
-
-                    ContentValues[] cvArray = new ContentValues[cVVector.size()];
-                    cVVector.toArray(cvArray);
-                    getContext().getContentResolver().bulkInsert(MovieContract.MovieEntry.CONTENT_URI, cvArray);
-
-                    fetchFavoriteMovieReviewsAndVideos();
-                }
-                Log.d(LOG_TAG, "Sync Complete. " + cVVector.size() + " Inserted");
-
 
             } catch (IOException e) {
                 Log.e(LOG_TAG, e.getMessage(), e);
@@ -244,7 +245,7 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
             ContentValues weatherValues = new ContentValues();
 
-            weatherValues.put(MovieContract.VideoEntry.COLUMN_MOVIE_ID, dbMovieId);
+            weatherValues.put(MovieContract.VideoEntry.COLUMN_FAVORITE_ID, dbMovieId);
             weatherValues.put(MovieContract.VideoEntry.COLUMN_LANGUAGE, video.getLanguague());
             weatherValues.put(MovieContract.VideoEntry.COLUMN_KEY, video.getKey());
             weatherValues.put(MovieContract.VideoEntry.COLUMN_NAME, video.getName());
@@ -274,7 +275,7 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
             ContentValues weatherValues = new ContentValues();
 
-            weatherValues.put(MovieContract.ReviewEntry.COLUMN_MOVIE_ID, dbMovieId);
+            weatherValues.put(MovieContract.ReviewEntry.COLUMN_FAVORITE_ID, dbMovieId);
             weatherValues.put(MovieContract.ReviewEntry.COLUMN_AUTHOR, review.getAuthor());
             weatherValues.put(MovieContract.ReviewEntry.COLUMN_CONTENT, review.getContent());
             weatherValues.put(MovieContract.ReviewEntry.COLUMN_URL, review.getUrl());

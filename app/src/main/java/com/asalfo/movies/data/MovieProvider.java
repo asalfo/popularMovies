@@ -14,7 +14,8 @@ public class MovieProvider extends ContentProvider {
     private MovieDBHelper mDBHelper;
 
     static final int MOVIE = 100;
-    static final int VIDEO_WITH_ID =101;
+    static final int FAVORITE_MOVIE =101;
+    static final int MOVIE_ID =102;
     static final int VIDEO = 200;
     static final int VIDEO_WITH_MOVIE = 201;
     static final int REVIEW = 300;
@@ -25,22 +26,44 @@ public class MovieProvider extends ContentProvider {
     private static final SQLiteQueryBuilder sVideoQueryBuilder;
     private static final SQLiteQueryBuilder sReviewQueryBuilder;
     private static final SQLiteQueryBuilder sMovieQueryBuilder;
+    private static final SQLiteQueryBuilder sMovieQueryBuilder1;
     private static final SQLiteQueryBuilder sFavoitreQueryBuilder;
 
     static{
         sVideoQueryBuilder = new SQLiteQueryBuilder();
         sVideoQueryBuilder.setTables(
-                MovieContract.VideoEntry.TABLE_NAME);
+                MovieContract.VideoEntry.TABLE_NAME + " INNER JOIN " +
+                        MovieContract.FavoriteEntry.TABLE_NAME +
+                        " ON " + MovieContract.VideoEntry.TABLE_NAME +
+                        "." + MovieContract.VideoEntry.COLUMN_FAVORITE_ID +
+                        " = " +  MovieContract.FavoriteEntry.TABLE_NAME +
+                        "." +  MovieContract.FavoriteEntry._ID);
     }
 
     static{
         sReviewQueryBuilder = new SQLiteQueryBuilder();
-        sReviewQueryBuilder.setTables(MovieContract.ReviewEntry.TABLE_NAME);
+        sReviewQueryBuilder.setTables(
+                MovieContract.ReviewEntry.TABLE_NAME + " INNER JOIN " +
+                        MovieContract.FavoriteEntry.TABLE_NAME +
+                        " ON " + MovieContract.ReviewEntry.TABLE_NAME +
+                        "." + MovieContract.ReviewEntry.COLUMN_FAVORITE_ID +
+                        " = " +  MovieContract.FavoriteEntry.TABLE_NAME +
+                        "." +  MovieContract.FavoriteEntry._ID);
     }
 
     static{
+        sMovieQueryBuilder1 = new SQLiteQueryBuilder();
+        sMovieQueryBuilder1.setTables(MovieContract.MovieEntry.TABLE_NAME);
+
         sMovieQueryBuilder = new SQLiteQueryBuilder();
-        sMovieQueryBuilder.setTables(MovieContract.MovieEntry.TABLE_NAME);
+
+        sMovieQueryBuilder.setTables(
+                MovieContract.MovieEntry.TABLE_NAME + " INNER JOIN " +
+                        MovieContract.FavoriteEntry.TABLE_NAME +
+                        " ON " + MovieContract.MovieEntry.TABLE_NAME +
+                        "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID+
+                        " = " +  MovieContract.FavoriteEntry.TABLE_NAME +
+                        "." +  MovieContract.FavoriteEntry.COLUMN_MOVIE_ID);
     }
 
     static{
@@ -57,12 +80,12 @@ public class MovieProvider extends ContentProvider {
 
     //video.movie_id = ?
     private static final String sVideoMovieSelection =
-            MovieContract.VideoEntry.TABLE_NAME+
-                    "." + MovieContract.VideoEntry.COLUMN_MOVIE_ID + " = ? ";
+            MovieContract.FavoriteEntry.TABLE_NAME+
+                    "." + MovieContract.FavoriteEntry.COLUMN_MOVIE_ID + " = ? ";
     //review.movie_id = ?
-    private static final String sReviewMovieSelection =
-            MovieContract.ReviewEntry.TABLE_NAME+
-                    "." + MovieContract.ReviewEntry.COLUMN_MOVIE_ID + " = ? ";
+    private static final String sReviewMovieSelectionn =
+            MovieContract.FavoriteEntry.TABLE_NAME+
+                    "." + MovieContract.FavoriteEntry.COLUMN_MOVIE_ID + " = ? ";
 
 
     //favorite.movie_id = ?
@@ -102,10 +125,23 @@ public class MovieProvider extends ContentProvider {
         selection = sMovieSelection;
         selectionArgs = new String[]{movie_id};
 
-        return sMovieQueryBuilder.query(mDBHelper.getReadableDatabase(),
+        return sMovieQueryBuilder1.query(mDBHelper.getReadableDatabase(),
                 projection,
                 selection,
                 selectionArgs,
+                null,
+                null,
+                sortOrder
+        );
+    }
+
+    private Cursor getFavoriteMovies(Uri uri, String[] projection, String sortOrder) {
+
+
+        return sMovieQueryBuilder.query(mDBHelper.getReadableDatabase(),
+                projection,
+                null,
+                null,
                 null,
                 null,
                 sortOrder
@@ -138,7 +174,7 @@ public class MovieProvider extends ContentProvider {
         String[] selectionArgs;
         String selection;
 
-        selection = sReviewMovieSelection;
+        selection =sReviewMovieSelectionn;
         selectionArgs = new String[]{movie_id};
 
         return sReviewQueryBuilder.query(mDBHelper.getReadableDatabase(),
@@ -159,7 +195,8 @@ public class MovieProvider extends ContentProvider {
 
         // For each type of URI you want to add, create a corresponding code.
         matcher.addURI(authority, MovieContract.PATH_MOVIE, MOVIE);
-        matcher.addURI(authority, MovieContract.PATH_MOVIE + "/*", VIDEO_WITH_ID);
+        matcher.addURI(authority, MovieContract.PATH_MOVIE + "/*/*", FAVORITE_MOVIE);
+        matcher.addURI(authority, MovieContract.PATH_MOVIE + "/*", MOVIE_ID);
 
         matcher.addURI(authority, MovieContract.PATH_FAVORITE, FAVORITE);
 
@@ -224,8 +261,15 @@ public class MovieProvider extends ContentProvider {
                 );
                 break;
             }
-            // "movie/*"
-            case VIDEO_WITH_ID:
+            // "*movie/favorite"
+            case FAVORITE_MOVIE:
+            {
+                retCursor = getFavoriteMovies(uri, projection, sortOrder);
+                break;
+            }
+
+            // "movie/id"
+            case MOVIE_ID:
             {
                 retCursor = getMovie(uri, projection, sortOrder);
                 break;

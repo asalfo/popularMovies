@@ -52,8 +52,9 @@ public class MovieDBHelper extends SQLiteOpenHelper {
 
         // Create a table to hold trailers.
         final String SQL_CREATE_VIDEO_TABLE = "CREATE TABLE " + VideoEntry.TABLE_NAME + " (" +
-                VideoEntry._ID + " INTEGER PRIMARY KEY," +
-                VideoEntry.COLUMN_MOVIE_ID +" INTEGER NOT NULL, " +
+                VideoEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                VideoEntry.COLUMN_VIDEO_ID +" INTEGER NOT NULL, " +
+                VideoEntry.COLUMN_FAVORITE_ID +" INTEGER NOT NULL, " +
                 VideoEntry.COLUMN_LANGUAGE + " TEXT , " +
                 VideoEntry.COLUMN_KEY + " TEXT NOT NULL, " +
                 VideoEntry.COLUMN_NAME + " TEXT NOT NULL, " +
@@ -61,21 +62,22 @@ public class MovieDBHelper extends SQLiteOpenHelper {
                 VideoEntry.COLUMN_SIZE + " TEXT NOT NULL, " +
                 VideoEntry.COLUMN_TYPE + " TEXT NOT NULL, " +
                 // Set up the movie column as a foreign key to movie table.
-                " FOREIGN KEY (" + VideoEntry.COLUMN_MOVIE_ID + ") REFERENCES " +
-                MovieEntry.TABLE_NAME + " (" + MovieEntry._ID + ") ON DELETE CASCADE " +
-                ");";
+                " FOREIGN KEY (" + VideoEntry.COLUMN_FAVORITE_ID + ") REFERENCES " +
+                MovieEntry.TABLE_NAME + " (" + FavoriteEntry._ID + ") ON DELETE CASCADE, " +
+                " UNIQUE (" + VideoEntry.COLUMN_VIDEO_ID + ") ON CONFLICT REPLACE);";
 
 
         // Create a table to hold reviews.
         final String SQL_CREATE_REVIEW_TABLE = "CREATE TABLE " + ReviewEntry.TABLE_NAME + " (" +
                 ReviewEntry._ID + " INTEGER PRIMARY KEY," +
-                ReviewEntry.COLUMN_MOVIE_ID +" INTEGER NOT NULL, " +
+                ReviewEntry.COLUMN_REVIEW_ID +" INTEGER NOT NULL, " +
+                ReviewEntry.COLUMN_FAVORITE_ID +" INTEGER NOT NULL, " +
                 ReviewEntry.COLUMN_AUTHOR + " TEXT NOT NULL, " +
                 ReviewEntry.COLUMN_CONTENT + " TEXT NOT NULL, " +
                 ReviewEntry.COLUMN_URL + " TEXT NOT NULL, " +
-                " FOREIGN KEY (" + VideoEntry.COLUMN_MOVIE_ID + ") REFERENCES " +
-                MovieEntry.TABLE_NAME + " (" + MovieEntry._ID + ")  ON DELETE CASCADE" +
-                " );";
+                " FOREIGN KEY (" + ReviewEntry.COLUMN_FAVORITE_ID + ") REFERENCES " +
+                MovieEntry.TABLE_NAME + " (" + FavoriteEntry._ID + ")  ON DELETE CASCADE, " +
+                " UNIQUE (" + ReviewEntry.COLUMN_REVIEW_ID + ") ON CONFLICT REPLACE);";
 
         // Create a table to hold favorites.
         final String SQL_CREATE_FAVORITE_TABLE = "CREATE TABLE " + FavoriteEntry.TABLE_NAME + " (" +

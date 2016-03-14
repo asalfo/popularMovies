@@ -2,30 +2,22 @@ package com.asalfo.movies.service;
 
 
 import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.asalfo.movies.BuildConfig;
 import com.asalfo.movies.R;
 import com.asalfo.movies.data.MovieContract;
-import com.asalfo.movies.model.Movie;
 import com.asalfo.movies.model.Review;
-import com.asalfo.movies.model.TmdbCollection;
 import com.asalfo.movies.model.Video;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Vector;
-
-import retrofit2.Call;
 
 
 public class FavoriteMovieTask  extends AsyncTask<String, Void, Integer> {
@@ -47,64 +39,49 @@ public class FavoriteMovieTask  extends AsyncTask<String, Void, Integer> {
      }
 
 
+    public void addToFavorite(String tmdbId) throws IOException {
 
+        ContentValues favoriteValues = new ContentValues();
 
-     public void addToFavorite (String tmdbId,String localId) throws IOException {
+        favoriteValues.put(MovieContract.FavoriteEntry.COLUMN_MOVIE_ID, tmdbId);
 
-         // First, check if the movie with this id exists in the db
-         Cursor movieCursor = mContext.getContentResolver().query(
-                 MovieContract.MovieEntry.CONTENT_URI,
-                 new String[]{MovieContract.MovieEntry._ID},
-                 MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ?",
-                 new String[]{tmdbId},
-                 null);
-
-         if (movieCursor.moveToFirst()) {
-             ContentValues updateValues = new ContentValues();
-
-             updateValues.put(MovieContract.MovieEntry.COLUMN_FAVORITE, 1);
-
-            int count =  mContext.getContentResolver().update(
-                    MovieContract.MovieEntry.CONTENT_URI, updateValues, MovieContract.MovieEntry._ID + "= ?",
-                    new String[]{localId});
-           if(count > 0){
-               addReviews(tmdbId, mReviews);
-               addVideo(tmdbId, mVideos);
-           }
-
-             movieCursor.close();
+        Uri uri = mContext.getContentResolver().insert(
+                MovieContract.FavoriteEntry.CONTENT_URI, favoriteValues);
+        String favId = MovieContract.FavoriteEntry.getFavoriteMovieIdFromUri(uri);
+        if (favId != null) {
+            addReviews(favId, mReviews);
+            addVideo(favId, mVideos);
         }
+    }
 
-
-     }
-
-     public  int removeMovie( String movie_id){
+     public  int removeFromFavorite( String movie_id){
          ContentResolver cr = mContext.getContentResolver();
          return cr.delete(
-                  MovieContract.MovieEntry.CONTENT_URI,
+                  MovieContract.FavoriteEntry.CONTENT_URI,
                   MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ?",
                   new String[]{movie_id});
 
      }
-     public void addVideo (String tmdbId,ArrayList<Video> videos) throws IOException {
+     public void addVideo (String favId,ArrayList<Video> videos) throws IOException {
 
          // Insert the new video information into the database
          Vector<ContentValues> cVVector = new Vector<>(videos.size());
 
          for( Video video : videos ) {
 
-             ContentValues weatherValues = new ContentValues();
+             ContentValues videoValues = new ContentValues();
 
-             weatherValues.put(MovieContract.VideoEntry.COLUMN_MOVIE_ID, tmdbId);
-             weatherValues.put(MovieContract.VideoEntry.COLUMN_LANGUAGE, video.getLanguague());
-             weatherValues.put(MovieContract.VideoEntry.COLUMN_KEY, video.getKey());
-             weatherValues.put(MovieContract.VideoEntry.COLUMN_NAME, video.getName());
-             weatherValues.put(MovieContract.VideoEntry.COLUMN_SITE, video.getSite());
-             weatherValues.put(MovieContract.VideoEntry.COLUMN_SIZE, video.getSize());
-             weatherValues.put(MovieContract.VideoEntry.COLUMN_TYPE, video.getType());
+             videoValues.put(MovieContract.VideoEntry.COLUMN_VIDEO_ID, video.getId());
+             videoValues.put(MovieContract.VideoEntry.COLUMN_FAVORITE_ID, favId);
+             videoValues.put(MovieContract.VideoEntry.COLUMN_LANGUAGE, video.getLanguague());
+             videoValues.put(MovieContract.VideoEntry.COLUMN_KEY, video.getKey());
+             videoValues.put(MovieContract.VideoEntry.COLUMN_NAME, video.getName());
+             videoValues.put(MovieContract.VideoEntry.COLUMN_SITE, video.getSite());
+             videoValues.put(MovieContract.VideoEntry.COLUMN_SIZE, video.getSize());
+             videoValues.put(MovieContract.VideoEntry.COLUMN_TYPE, video.getType());
 
 
-             cVVector.add(weatherValues);
+             cVVector.add(videoValues);
          }
          // add to database
          if ( cVVector.size() > 0 ) {
@@ -115,7 +92,7 @@ public class FavoriteMovieTask  extends AsyncTask<String, Void, Integer> {
      }
 
 
-     public void addReviews (String tmdbId,ArrayList<Review> reviews) throws IOException {
+     public void addReviews (String favId,ArrayList<Review> reviews) throws IOException {
 
          // Insert the new reviews information into the database
          Vector<ContentValues> cVVector = new Vector<>(reviews.size());
@@ -124,7 +101,8 @@ public class FavoriteMovieTask  extends AsyncTask<String, Void, Integer> {
 
              ContentValues weatherValues = new ContentValues();
 
-             weatherValues.put(MovieContract.ReviewEntry.COLUMN_MOVIE_ID, tmdbId);
+             weatherValues.put(MovieContract.ReviewEntry.COLUMN_REVIEW_ID, review.getId());
+             weatherValues.put(MovieContract.ReviewEntry.COLUMN_FAVORITE_ID, favId);
              weatherValues.put(MovieContract.ReviewEntry.COLUMN_AUTHOR, review.getAuthor());
              weatherValues.put(MovieContract.ReviewEntry.COLUMN_CONTENT, review.getContent());
              weatherValues.put(MovieContract.ReviewEntry.COLUMN_URL, review.getUrl());
@@ -149,17 +127,16 @@ public class FavoriteMovieTask  extends AsyncTask<String, Void, Integer> {
         int result =-1;
 
         String tmdbId = params[0];
-        String localId = params[1];
-        String action = params[2];
+        String action = params[1];
 
         try {
             switch (action) {
                 case ACTION_ADD :
-                    addToFavorite(tmdbId,localId);
+                    addToFavorite(tmdbId);
                     result = 1;
                     break;
                 case ACTION_REMOVE:
-                    removeMovie(tmdbId);
+                    removeFromFavorite(tmdbId);
                     result = 2;
                     break;
                 default:

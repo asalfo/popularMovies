@@ -9,10 +9,17 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.ShareActionProvider;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,7 +29,6 @@ import android.widget.TextView;
 
 import com.asalfo.movies.adapter.TrailerSlideAdapter;
 import com.asalfo.movies.data.MovieContract;
-import com.asalfo.movies.model.Movie;
 import com.asalfo.movies.model.Review;
 import com.asalfo.movies.model.TmdbCollection;
 import com.asalfo.movies.model.Video;
@@ -85,8 +91,7 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
     public static final int COLUMN_FAVORITE = 17;
 
     public static final String[] VIDEO_COLUMNS = {
-            MovieContract.VideoEntry._ID,
-            MovieContract.VideoEntry.COLUMN_MOVIE_ID,
+            MovieContract.VideoEntry.TABLE_NAME + "." + MovieContract.VideoEntry._ID,
             MovieContract.VideoEntry.COLUMN_LANGUAGE,
             MovieContract.VideoEntry.COLUMN_KEY,
             MovieContract.VideoEntry.COLUMN_NAME,
@@ -94,31 +99,33 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
             MovieContract.VideoEntry.COLUMN_SIZE,
             MovieContract.VideoEntry.COLUMN_TYPE
     };
-    public static final int COL_ID = 0;
-    public static final int COL_MOVIE_ID = 1;
-    public static final int COL_VIDEO_LANGUAGE = 2;
-    public static final int COL_VIDEO_KEY = 3;
-    public static final int COL_VIDEO_NAME = 4;
-    public static final int COL_VIDEO_SITE = 5;
-    public static final int COL_VIDEO_SIZE = 6;
-    public static final int COL_VIDEO_TYPE = 7;
+
+    public static final int COL_VIDEO_ID = 0;
+    public static final int COL_VIDEO_LANGUAGE = 1;
+    public static final int COL_VIDEO_KEY = 2;
+    public static final int COL_VIDEO_NAME = 3;
+    public static final int COL_VIDEO_SITE = 4;
+    public static final int COL_VIDEO_SIZE = 5;
+    public static final int COL_VIDEO_TYPE = 6;
 
     public static final String[] REVIEWS_COLUMNS = {
-            MovieContract.ReviewEntry._ID,
-            MovieContract.ReviewEntry.COLUMN_MOVIE_ID,
+            MovieContract.ReviewEntry.TABLE_NAME + "." + MovieContract.ReviewEntry._ID,
             MovieContract.ReviewEntry.COLUMN_AUTHOR,
             MovieContract.ReviewEntry.COLUMN_CONTENT,
             MovieContract.ReviewEntry.COLUMN_URL
     };
 
-    public static final int COL_REVIEW_MOVIE_ID = 1;
-    public static final int COL_REVIEW_AUTHOR = 2;
-    public static final int COL_REVIEW_CONTENT = 3;
-    public static final int COL_REVIEW_URL = 4;
+    public static final int COL_REVIEW_ID = 0;
+    public static final int COL_REVIEW_AUTHOR = 1;
+    public static final int COL_REVIEW_CONTENT = 2;
+    public static final int COL_REVIEW_URL = 3;
+
     public static final String REVIEWS_KEY = "reviews";
+    public static final String VIDEO_KEY = "reviews";
     static final String DETAIL_URI = "URI";
-    static final String DETAIL_TRANSITION_ANIMATION = "DTA";
-    private static final String FORECAST_SHARE_HASHTAG = " #PopularMovieApp";
+    static final String FAVORITE = "favorite";
+
+    private static final String MOVIE_SHARE_HASHTAG = " #PopularMovieApp";
     private static final long ANIM_VIEWPAGER_DELAY = 5000;
     private static final long ANIM_VIEWPAGER_DELAY_USER_VIEW = 10000;
     private static int DETAIL_LOADER = 0;
@@ -126,7 +133,7 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
     TextView mImgNameTxt;
     boolean mStopSliding = false;
     boolean mFavoriteMovie;
-    private String mTmdbMovieId, mLocalMovieId;
+    private String mTmdbMovieId;
     private ArrayList<Video> mVideos = new ArrayList<Video>();
     private ArrayList<Review> mReviews = new ArrayList<Review>();
     private Uri mUri;
@@ -142,40 +149,17 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
     private View mReviewView;
     private TrailerSlideAdapter mTrailerAdapter;
     private ViewPager mViewPager;
-    private int mCurrentPage;
     private Runnable animateViewPager;
     private Handler handler;
+    private ShareActionProvider mShareActionProvider;
+    private String mShareTrailer;
 
     public DetailActivityFragment() {
+        setHasOptionsMenu(true);
     }
 
 
-//    @Override
-//    public void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-////        if (savedInstanceState == null || !savedInstanceState.containsKey(MOVIE_KEY)) {
-////            Intent intent = getActivity().getIntent();
-////            if (intent != null && intent.hasExtra("movie")) {
-////                mMovie = intent.getParcelableExtra("movie");
-////                retrieveVideos(mMovie.getId());
-////            }
-////        } else {
-////            Log.d(LOG_TAG, "savedInstanceState");
-////            mMovie = savedInstanceState.getParcelable(MOVIE_KEY);
-////            mVideos = savedInstanceState.getParcelableArrayList(VIDEO_KEY);
-////            mCurrentPage = savedInstanceState.getInt(PAGE_NUM);
-////        }
-//
-//        Bundle arguments = getArguments();
-//
-//        if (arguments != null) {
-//            Log.d(LOG_TAG,"NOT NULL");
-//            mUri = arguments.getParcelable(DetailActivityFragment.DETAIL_URI);
-//            // mTransitionAnimation = arguments.getBoolean(DetailFragment.DETAIL_TRANSITION_ANIMATION, false);
-//        }
-//
-//        this.setRetainInstance(true);
-//    }
+
 
 
     @Override
@@ -186,11 +170,11 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
         Bundle arguments = getArguments();
 
         if (arguments != null) {
-            Log.d(LOG_TAG, "NOT NULL");
+
             mUri = arguments.getParcelable(DetailActivityFragment.DETAIL_URI);
-            // mTransitionAnimation = arguments.getBoolean(DetailFragment.DETAIL_TRANSITION_ANIMATION, false);
+            mFavoriteMovie = arguments.getBoolean(DetailActivityFragment.FAVORITE, false);
         } else {
-            Log.d(LOG_TAG, "NULL NULL");
+
         }
 
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
@@ -214,7 +198,7 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
             public void onClick(View v) {
                 FavoriteMovieTask favTask = new FavoriteMovieTask(getActivity(), mFavIcon, mVideos, mReviews);
                 String action = mFavoriteMovie ? FavoriteMovieTask.ACTION_REMOVE : FavoriteMovieTask.ACTION_ADD;
-                favTask.execute(mTmdbMovieId, mLocalMovieId, action);
+                favTask.execute(mTmdbMovieId, action);
             }
         });
         mReviewCount = (TextView) rootView.findViewById(R.id.review_count);
@@ -268,24 +252,35 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
     }
 
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        if (mVideos != null && mVideos.size() != 0) {
-            mTrailerAdapter = new TrailerSlideAdapter(
-                    getActivity(), mVideos, DetailActivityFragment.this);
-            mViewPager.setAdapter(mTrailerAdapter);
-            mIndicator.setViewPager(mViewPager);
-            mViewPager.setCurrentItem(mCurrentPage);
-        }
 
+    void onLocationChanged( String newSelection ) {
+        Uri uri = mUri;
+        if (null != uri) {
+            getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
+        }
     }
+
+    private void finishCreatingMenu(Menu menu) {
+        MenuItem menuItem = menu.findItem(R.id.action_share);
+        menuItem.setIntent(createShareForecastIntent());
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_detail, menu);
+        MenuItem menuItem = menu.findItem(R.id.action_share);
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+        if (mShareTrailer!= null) {
+            createShareForecastIntent();
+        }
+    }
+
 
     private Intent createShareForecastIntent() {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
         shareIntent.setType("text/plain");
-        shareIntent.putExtra(Intent.EXTRA_TEXT, "MOVIE" + FORECAST_SHARE_HASHTAG);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, mShareTrailer + MOVIE_SHARE_HASHTAG);
         return shareIntent;
     }
 
@@ -298,51 +293,129 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
     @Override
     public void onSaveInstanceState(Bundle outState) {
 
-//        if (mMovie != null) {
-//            outState.putParcelable(MOVIE_KEY, mMovie);
-//            outState.putParcelableArrayList(VIDEO_KEY, mVideos);
-//            outState.putInt(PAGE_NUM, mViewPager.getCurrentItem());
-//        }
+        outState.putParcelableArrayList(REVIEWS_KEY, mReviews);
+        outState.putParcelableArrayList(VIDEO_KEY, mVideos);
+
         super.onSaveInstanceState(outState);
     }
 
-    private boolean isFavorite(Movie movie) {
-        Cursor movieCursor = getActivity().getContentResolver().query(
-                MovieContract.MovieEntry.CONTENT_URI,
-                new String[]{MovieContract.MovieEntry._ID},
-                MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ?",
-                new String[]{movie.getId()},
-                null);
 
-        if (movieCursor.moveToFirst()) {
-            return true;
-        }
-        return false;
+
+    public void runnable(final int size) {
+        handler = new Handler();
+        animateViewPager = new Runnable() {
+            public void run() {
+                if (!mStopSliding) {
+                    if (mViewPager.getCurrentItem() == size - 1) {
+                        mViewPager.setCurrentItem(0);
+                    } else {
+                        mViewPager.setCurrentItem(
+                                mViewPager.getCurrentItem() + 1, true);
+                    }
+                    handler.postDelayed(animateViewPager, ANIM_VIEWPAGER_DELAY);
+                }
+            }
+        };
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Log.d(LOG_TAG, "onCreateLoader sss " + mUri);
+
+        if (null != mUri) {
+            // Now create and return a CursorLoader that will take care of
+            // creating a Cursor for the data being displayed.
+            return new CursorLoader(
+                    getActivity(),
+                    mUri,
+                    DETAIL_COLUMNS,
+                    null,
+                    null,
+                    null
+            );
+
+        }
+        ViewParent vp = getView().getParent();
+        if (vp instanceof CardView) {
+            ((View) vp).setVisibility(View.INVISIBLE);
+        }
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        if (data != null && data.moveToFirst()) {
+            ViewParent vp = getView().getParent();
+            if (vp instanceof CardView) {
+                ((View) vp).setVisibility(View.VISIBLE);
+            }
+            mTmdbMovieId = data.getString(COLUMN_MOVIE_ID);
+
+
+            if (mFavoriteMovie) {
+                mFavIcon.setImageResource(R.drawable.ic_favorite);
+            }
+            String movie_id = data.getString(COLUMN_MOVIE_ID);
+
+            String posterUrl = Utility.generatePosterUrl(data.getString(COLUMN_POSTER_PATH), "w185");
+            Picasso.with(getActivity()).load(posterUrl).into(mPoster);
+            Picasso.with(getActivity()).load(posterUrl).into(mPoster);
+            mTitle.setText(data.getString(COLUMN_ORIGINAL_TITLE));
+            mReleaseDate.setText("Released: " + data.getString(COLUMN_RELEASE_DATE));
+            mVoteAverage.setText(data.getString(COLUMN_VOTE_AVERAGE));
+            mVoteCount.setText(data.getString(COLUMN_VOTE_COUNT));
+            mPopularity.setText(String.format("%1$.2f", data.getFloat(COLUMN_POPULARITY)));
+            mSynopsis.setText(data.getString(COLUMN_OVERVIEW));
+            retrieveVideos(movie_id);
+            retreiveReviews(movie_id);
+
+            createShareForecastIntent();
+            AppCompatActivity activity = (AppCompatActivity)getActivity();
+            Toolbar toolbarView = (Toolbar) getView().findViewById(R.id.toolbar);
+
+                if ( null != toolbarView ) {
+                    activity.setSupportActionBar(toolbarView);
+
+                    activity.getSupportActionBar().setDisplayShowTitleEnabled(false);
+                    activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+                    Menu menu = toolbarView.getMenu();
+                    if ( null != menu ) menu.clear();
+                    toolbarView.inflateMenu(R.menu.menu_detail);
+                    finishCreatingMenu(toolbarView.getMenu());
+                }
+
+
+        }
+
+    }
 
     private void retrieveVideos(String movie_id) {
-
+        mVideos.clear();
         if (mFavoriteMovie) {
+            Uri favoriteUri = MovieContract.VideoEntry.buildVideoMovie(movie_id);
+
             Cursor videoCursor = getActivity().getContentResolver().query(
-                    MovieContract.VideoEntry.CONTENT_URI,
+                    favoriteUri,
                     VIDEO_COLUMNS,
-                    MovieContract.VideoEntry.COLUMN_MOVIE_ID + " = ?",
+                    MovieContract.FavoriteEntry.COLUMN_MOVIE_ID + " = ?",
                     new String[]{ movie_id},
                     null);
 
             if (videoCursor.moveToFirst()) {
                 do {
-                    Video video = new Video(videoCursor.getString(COL_MOVIE_ID),
-                                            videoCursor.getString(COL_VIDEO_LANGUAGE),
-                                            videoCursor.getString(COL_VIDEO_KEY),
-                                            videoCursor.getString(COL_VIDEO_NAME),
-                                            videoCursor.getString(COL_VIDEO_SITE),
-                                            videoCursor.getString(COL_VIDEO_SIZE),
-                                            videoCursor.getString(COL_VIDEO_TYPE)
-                                         );
+                    Video video = new Video(videoCursor.getString(COL_VIDEO_ID),
+                            videoCursor.getString(COL_VIDEO_LANGUAGE),
+                            videoCursor.getString(COL_VIDEO_KEY),
+                            videoCursor.getString(COL_VIDEO_NAME),
+                            videoCursor.getString(COL_VIDEO_SITE),
+                            videoCursor.getString(COL_VIDEO_SIZE),
+                            videoCursor.getString(COL_VIDEO_TYPE)
+                    );
                     mVideos.add(video);
-
+                    if(mVideos.size() == 1 ) {
+                        mShareTrailer = Utility.generateYoutubeVideoUrl(mVideos.get(0).getKey());
+                    }
 
                 }while (videoCursor.moveToNext());
             }
@@ -405,94 +478,20 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
 
     }
 
-
-    public void runnable(final int size) {
-        handler = new Handler();
-        animateViewPager = new Runnable() {
-            public void run() {
-                if (!mStopSliding) {
-                    if (mViewPager.getCurrentItem() == size - 1) {
-                        mViewPager.setCurrentItem(0);
-                    } else {
-                        mViewPager.setCurrentItem(
-                                mViewPager.getCurrentItem() + 1, true);
-                    }
-                    handler.postDelayed(animateViewPager, ANIM_VIEWPAGER_DELAY);
-                }
-            }
-        };
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Log.d(LOG_TAG, "onCreateLoader sss " + mUri);
-
-        if (null != mUri) {
-            // Now create and return a CursorLoader that will take care of
-            // creating a Cursor for the data being displayed.
-            return new CursorLoader(
-                    getActivity(),
-                    mUri,
-                    DETAIL_COLUMNS,
-                    null,
-                    null,
-                    null
-            );
-
-        }
-        ViewParent vp = getView().getParent();
-        if (vp instanceof CardView) {
-            ((View) vp).setVisibility(View.INVISIBLE);
-        }
-        return null;
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if (data != null && data.moveToFirst()) {
-            ViewParent vp = getView().getParent();
-            if (vp instanceof CardView) {
-                ((View) vp).setVisibility(View.VISIBLE);
-            }
-            mTmdbMovieId = data.getString(COLUMN_MOVIE_ID);
-            mLocalMovieId = data.getString(_ID);
-            mFavoriteMovie = (data.getInt(COLUMN_FAVORITE) == 1) ? true : false;
-            if (mFavoriteMovie) {
-                mFavIcon.setImageResource(R.drawable.ic_favorite);
-            }
-            String movie_id = data.getString(COLUMN_MOVIE_ID);
-
-            String posterUrl = Utility.generatePosterUrl(data.getString(COLUMN_POSTER_PATH), "w185");
-            Picasso.with(getActivity()).load(posterUrl).into(mPoster);
-            Picasso.with(getActivity()).load(posterUrl).into(mPoster);
-            mTitle.setText(data.getString(COLUMN_ORIGINAL_TITLE));
-            mReleaseDate.setText("Released: " + data.getString(COLUMN_RELEASE_DATE));
-            mVoteAverage.setText(data.getString(COLUMN_VOTE_AVERAGE));
-            mVoteCount.setText(data.getString(COLUMN_VOTE_COUNT));
-            mPopularity.setText(String.format("%1$.2f", data.getFloat(COLUMN_POPULARITY)));
-            mSynopsis.setText(data.getString(COLUMN_OVERVIEW));
-            retrieveVideos(movie_id);
-            retreiveReviews(movie_id);
-
-
-        }
-
-    }
-
     private void retreiveReviews(String movie_id) {
-
+        mReviews.clear();
         if (mFavoriteMovie) {
-            Log.d(LOG_TAG,movie_id);
+            Uri favoriteUri = MovieContract.ReviewEntry.buildReviewMovie(movie_id);
             Cursor reviewCursor = getActivity().getContentResolver().query(
-                    MovieContract.ReviewEntry.CONTENT_URI,
+                    favoriteUri,
                     REVIEWS_COLUMNS,
-                    MovieContract.ReviewEntry.COLUMN_MOVIE_ID + " = ?",
+                    MovieContract.FavoriteEntry.COLUMN_MOVIE_ID + " = ?",
                     new String[]{ movie_id},
                     null);
 
             if (reviewCursor.moveToFirst()) {
                 do {
-                    Review review = new Review(reviewCursor.getString(COL_REVIEW_MOVIE_ID),
+                    Review review = new Review(reviewCursor.getString(COL_REVIEW_ID),
                             reviewCursor.getString(COL_REVIEW_AUTHOR),
                             reviewCursor.getString(COL_REVIEW_CONTENT),
                             reviewCursor.getString(COL_REVIEW_URL)

@@ -15,8 +15,8 @@
 
         <ImageView
             android:id="@+id/ic_popularity"
-            android:layout_width="@dimen/phoneRatingWidgetStarWidth"
-            android:layout_height="@dimen/phoneRatingWidgetStarHeight"
+            android:layout_width="@dimen/ratingWidth"
+            android:layout_height="@dimen/ratingHeight"
             android:layout_alignParentLeft="true"
             android:layout_centerInParent="true"
             android:layout_gravity="center_vertical"

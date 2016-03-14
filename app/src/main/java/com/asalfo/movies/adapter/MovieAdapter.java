@@ -68,7 +68,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     }
 
     public static interface MovieAdapterOnClickHandler {
-        void onClick(Long date, MovieAdapterViewHolder vh);
+        void onClick(Long id, MovieAdapterViewHolder vh);
     }
 
     @Override
