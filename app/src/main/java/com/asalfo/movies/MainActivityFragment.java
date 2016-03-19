@@ -1,342 +1,233 @@
 package com.asalfo.movies;
 
+import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.res.TypedArray;
+import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
+import android.support.design.widget.AppBarLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v4.view.ViewCompat;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.GridView;
-import android.widget.ProgressBar;
+import android.view.ViewTreeObserver;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.asalfo.movies.adapter.MovieAdapter;
+import com.asalfo.movies.data.MovieContract;
+import com.asalfo.movies.service.MovieSyncAdapter;
+import com.asalfo.movies.ui.CustomRecyclerView;
+import com.asalfo.movies.ui.MarginDecoration;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
+
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment  {
+public class MainActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     public static final String LOG_TAG = MainActivityFragment.class.getSimpleName();
-    public static final String CURRENT_PAGE_KEY = "current_page";
-    public static final String NEXT_PAGE_KEY = "next_page";
-    private MovieAdapter mMovieAdapter;
-    private ArrayList<Movie> mMovieList;
-    GridView mGridView;
-    ProgressBar mProgressBar;
-    SwipeRefreshLayout mSwipeLayout;
-    int mCurrentPage;
-    int mNextPage;
-    Boolean mUserScrolled = false;
-    private int mPosition = GridView.INVALID_POSITION;
-    private static final String SELECTED_KEY = "selected_position";
-    private static final String MOVIE_LIST_KEY = "movie_list";
-    private String mSortValue;
 
+
+    public static final String FAVORITE = "favorite";
+    public static final int ID = 0;
+    public static final int COLUMN_MOVIE_ID = 1;
+    public static final int COLUMN_POSTER_PATH = 2;
+    public static final int COLUMN_BACKDROP_PATH = 3;
+    static final String SELECTION = "selection";
+    private static final int MOVIE_LOADER = 0;
+    private static final String[] MOVIE_COLUMNS = {
+            MovieContract.MovieEntry.TABLE_NAME + "." + MovieContract.MovieEntry._ID,
+            MovieContract.MovieEntry.TABLE_NAME + "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID,
+            MovieContract.MovieEntry.COLUMN_POSTER_PATH,
+            MovieContract.MovieEntry.COLUMN_BACKDROP_PATH
+    };
+    private CustomRecyclerView mRecyclerView;
+    private MovieAdapter mMovieAdapter;
+    private ArrayList<String> mFavoriteMovies = new ArrayList<>();
+    private boolean mAutoSelectView;
 
 
     public MainActivityFragment() {
+
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (savedInstanceState == null || !savedInstanceState.containsKey(MOVIE_LIST_KEY)) {
-            mMovieList = new ArrayList<Movie>();
-            mCurrentPage = 0;
-            mNextPage = 1;
-        } else {
-            mMovieList = savedInstanceState.getParcelableArrayList(MOVIE_LIST_KEY);
-            mCurrentPage = savedInstanceState.getInt(CURRENT_PAGE_KEY);
-            mNextPage = savedInstanceState.getInt(NEXT_PAGE_KEY);
-        }
-        mSortValue = Utility.getPreferredSortBy(getActivity());
+    public void onInflate(Context context, AttributeSet attrs, Bundle savedInstanceState) {
+        super.onInflate(context, attrs, savedInstanceState);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MainActivityFragment,
+                0, 0);
+        mAutoSelectView = a.getBoolean(R.styleable.MainActivityFragment_autoSelectView, false);
+        a.recycle();
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-
-        // When tablets rotate, the currently selected list item needs to be saved.
-        // When no item is selected, mPosition will be set to Listview.INVALID_POSITION,
-        // so check for that before storing.
-        if (mPosition != GridView.INVALID_POSITION) {
-            outState.putInt(SELECTED_KEY, mPosition);
-        }
-        if (!mMovieList.isEmpty()) {
-            outState.putParcelableArrayList(MOVIE_LIST_KEY, mMovieList);
-            outState.putInt(CURRENT_PAGE_KEY, mCurrentPage);
-            outState.putInt(NEXT_PAGE_KEY, mNextPage);
-        }
-        super.onSaveInstanceState(outState);
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mMovieAdapter = new MovieAdapter(getActivity(), 0, mMovieList);
+
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        View emptyView = rootView.findViewById(R.id.recyclerview_poster_empty);
 
-        mProgressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
-        mProgressBar.setIndeterminate(true);
-        mProgressBar.setVisibility(View.GONE);
 
-        mGridView = (GridView) rootView.findViewById(R.id.gridview);
-        mGridView.setAdapter(mMovieAdapter);
-
-        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
+        mRecyclerView = (CustomRecyclerView) rootView.findViewById(R.id.recyclerview_poster);
+        mRecyclerView.addItemDecoration(new MarginDecoration(getActivity()));
+        mRecyclerView.setHasFixedSize(true);
+        mMovieAdapter = new MovieAdapter(getActivity(), new MovieAdapter.MovieAdapterOnClickHandler() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Movie movie = mMovieAdapter.getItem(position);
-                mPosition = position;
-                Intent intent = new Intent(getActivity(), DetailActivity.class)
-                        .putExtra("movie", movie);
-                startActivity(intent);
+            public void onClick(Long id, MovieAdapter.MovieAdapterViewHolder vh) {
 
+                Boolean favorite = mFavoriteMovies.contains(id.toString());
+                ((Callback) getActivity())
+                        .onItemSelected(MovieContract.MovieEntry.buildMovieUri(id), favorite, vh
+                        );
             }
-        });
+        }, emptyView);
 
-        // If there's instance state, mine it for useful information.
-        // The end-goal here is that the user never knows that turning their device sideways
-        // does crazy lifecycle related things.  It should feel like some stuff stretched out,
-        // or magically appeared to take advantage of room, but data or place in the app was never
-        // actually *lost*.
-        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
-            // The listview probably hasn't even been populated yet.  Actually perform the
-            // swapout in onLoadFinished.
-            mPosition = savedInstanceState.getInt(SELECTED_KEY);
+        mRecyclerView.setAdapter(mMovieAdapter);
+
+
+        final AppBarLayout appbarView = (AppBarLayout)rootView.findViewById(R.id.appbar);
+        if (null != appbarView) {
+            ViewCompat.setElevation(appbarView, 0);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+                    @Override
+                    public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                        if (0 == mRecyclerView.computeVerticalScrollOffset()) {
+                            appbarView.setElevation(0);
+                        } else {
+                            appbarView.setElevation(appbarView.getTargetElevation());
+                        }
+                    }
+                });
+            }
         }
-
-        mGridView.setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-                if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
-                    mUserScrolled = true;
-
-                }
-            }
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if (mUserScrolled
-                        && firstVisibleItem + visibleItemCount == totalItemCount) {
-                    mUserScrolled = false;
-                    mNextPage++;
-                    Log.d(LOG_TAG, "onScroll Movie Page to be loaded !" + mNextPage);
-                    updateMovie();
-
-                }
-
-            }
-        });
 
         return rootView;
     }
 
-    private void updateMovie() {
-        String sort_value = Utility.getPreferredSortBy(getActivity());
-        if (sort_value != null && !sort_value.equals(mSortValue)) {
-            mMovieAdapter.clear();
-            mNextPage =1;
-            mCurrentPage = 0;
-            mSortValue = sort_value;
-        }
-        if (mCurrentPage != mNextPage) {
-            mProgressBar.setVisibility(View.VISIBLE);
-            FetchMovieTask mMovieTask = new FetchMovieTask();
-            mMovieTask.execute(sort_value);
-        }
-        Log.d(LOG_TAG, "Called updateMovie!" + sort_value);
-        Log.d(LOG_TAG, "Called updateMovie!" + mSortValue);
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+
+        getLoaderManager().initLoader(MOVIE_LOADER, null, this);
+        super.onActivityCreated(savedInstanceState);
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        updateMovie();
-        if(mPosition != GridView.INVALID_POSITION) {
-            mGridView.smoothScrollToPosition(mPosition);
-            Log.d(LOG_TAG, "Movie Current position!" + mPosition);
-        }
+    public void onResume() {
+        loadFavoriteMovies();
+        super.onResume();
     }
 
+    // since we read the selection when we create the loader, all we need to do is restart things
+    void onSelectionChanged(String selection) {
+        Bundle args = new Bundle();
+        args.putString(MainActivityFragment.SELECTION, selection);
+        getLoaderManager().restartLoader(MOVIE_LOADER, args, this);
+    }
 
+    private void loadFavoriteMovies() {
 
-    public class FetchMovieTask extends AsyncTask<String, Void, ArrayList<Movie>> {
-
-        private final String LOG_TAG = FetchMovieTask.class.getSimpleName();
-        private Context context;
-
-        public FetchMovieTask() {
+        Cursor favoriteCursor = getActivity().getContentResolver().query(
+                MovieContract.FavoriteEntry.CONTENT_URI,
+                new String[]{MovieContract.FavoriteEntry._ID, MovieContract.FavoriteEntry.COLUMN_MOVIE_ID},
+                null, null, null);
+        mFavoriteMovies.clear();
+        if (favoriteCursor.moveToNext()) {
+            do {
+                mFavoriteMovies.add(favoriteCursor.getString(1));
+            } while (favoriteCursor.moveToNext());
         }
 
-        private ArrayList<Movie> getMovieDataFromJson(String movieJsonStr)
-                throws JSONException {
+        favoriteCursor.close();
+    }
 
-            // These are the names of the JSON objects that need to be extracted.
-            final String TMDB_RESULT = "results";
-            final String TMDB_MOVIE_ID = "id";
-            final String TMDB_MOVIE_POSTER_PATH = "poster_path";
-            final String TMDB_MOVIE_OVERVIEW = "overview";
-            final String TMDB_MOVIE_RELEASE_DATE = "release_date";
-            final String TMDB_MOVIE_TITLE = "original_title";
-            final String TMDB_MOVIE_VOTE_AVERAGE = "vote_average";
-            final String TMDB_TOTAL_RESULTS = "total_results";
-            final String TMDB_PAGE = "page";
-            final String TMDB_TOTAL_PAGES = "total_pages";
-
-            final String MOVIE_POSTER_BASE_URL = "http://image.tmdb.org/t/p/#";
-            JSONObject movieJson = new JSONObject(movieJsonStr);
-            JSONArray movieArray = movieJson.getJSONArray(TMDB_RESULT);
-            SharedPreferences sharedPrefs =
-                    PreferenceManager.getDefaultSharedPreferences(getActivity());
-
-            ArrayList<Movie> movies = new ArrayList();
-
-            for (int i = 0; i < movieArray.length(); i++) {
-                String id;
-                String title;
-                String thumbnailUrl;
-                String synopsis;
-                Float rating;
-                String releaseDate;
-
-                // Get the JSON object representing the movie
-                JSONObject movieObject = movieArray.getJSONObject(i);
-                id = movieObject.getString(TMDB_MOVIE_ID);
-                title = movieObject.getString(TMDB_MOVIE_TITLE);
-                thumbnailUrl = MOVIE_POSTER_BASE_URL.concat(movieObject.getString(TMDB_MOVIE_POSTER_PATH));
-                synopsis = movieObject.getString(TMDB_MOVIE_OVERVIEW);
-                rating = (float) movieObject.getDouble(TMDB_MOVIE_VOTE_AVERAGE);
-                releaseDate = movieObject.getString(TMDB_MOVIE_RELEASE_DATE);
-                Movie movie = new Movie(id, title, thumbnailUrl, synopsis, rating, releaseDate);
-
-                movies.add(movie);
-            }
-            return movies;
-
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        String sort_selection = Utility.getPreferredSelection(getActivity()).replace(".", " ");
+        Uri movieUri;
+        if (null != args) {
+            sort_selection = args.getString(SELECTION).replace(".", " ");
         }
 
-        @Override
-        protected ArrayList<Movie> doInBackground(String... params) {
+        if (sort_selection.equals(FAVORITE) || !Utility.isNetworkAvailable(getActivity())) {
+            movieUri = MovieContract.MovieEntry.buildFavoriteMoviesUri();
+            sort_selection = MovieSyncAdapter.DEFAULT_SELECTION.replace(".", " ");
+        } else {
+            movieUri = MovieContract.MovieEntry.CONTENT_URI;
+        }
 
-            // If there's no zip code, there's nothing to look up.  Verify size of params.
-            if (params.length == 0) {
-                return null;
-            }
+        return  new CursorLoader(getActivity(),
+                movieUri,
+                MOVIE_COLUMNS,
+                null,
+                null,
+                sort_selection);
+    }
 
-            // These two need to be declared outside the try/catch
-            // so that they can be closed in the finally block.
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mMovieAdapter.swapCursor(data);
+        updateToolbar();
+        if ( data.getCount() == 0 ) {
+            getActivity().supportStartPostponedEnterTransition();
+        } else {
+            mRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    if (mRecyclerView.getChildCount() > 0) {
+                        mRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
+                        int position = mMovieAdapter.getSelectedItemPosition();
 
-            // Will contain the raw JSON response as a string.
-            String movieJsonStr = null;
-
-            try {
-                // Construct the URL for the OpenWeatherMap query
-                // Possible parameters are avaiable at OWM's forecast API page, at
-                // http://openweathermap.org/API#forecast
-                final String MOVIE_BASE_URL =
-                        "http://api.themoviedb.org/3/discover/movie?";
-                final String SORT_BY_PARAM = "sort_by";
-                final String APIKEY_PARAM = "api_key";
-                final String PAGE_PARAM = "page";
-                Log.d(LOG_TAG, "Next page to be loaded!" + mNextPage);
-                Uri builtUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
-                        .appendQueryParameter(SORT_BY_PARAM, params[0])
-                        .appendQueryParameter(PAGE_PARAM, String.valueOf(mNextPage))
-                        .appendQueryParameter(APIKEY_PARAM, BuildConfig.THE_MOVIE_DB_API_KEY)
-                        .build();
-
-                URL url = new URL(builtUri.toString());
-                Log.d(LOG_TAG, "Called url!" + url);
-                // Create the request to OpenWeatherMap, and open the connection
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-
-                // Read the input stream into a String
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-                if (inputStream == null) {
-                    // Nothing to do.
-                    return null;
-                }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                    // But it does make debugging a *lot* easier if you print out the completed
-                    // buffer for debugging.
-                    buffer.append(line + "\n");
-                }
-
-                if (buffer.length() == 0) {
-                    // Stream was empty.  No point in parsing.
-                    return null;
-                }
-                movieJsonStr = buffer.toString();
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "Error ", e);
-                // If the code didn't successfully get the weather data, there's no point in attemping
-                // to parse it.
-                return null;
-            } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e(LOG_TAG, "Error closing stream", e);
+                        if (position == RecyclerView.NO_POSITION) position = 0;
+                        RecyclerView.ViewHolder vh = mRecyclerView.findViewHolderForAdapterPosition(position);
+                        if (null != vh && mAutoSelectView) {
+                            mMovieAdapter.selectView(vh);
+                        }
+                        return true;
                     }
+                    return false;
                 }
-            }
-
-            try {
-                return getMovieDataFromJson(movieJsonStr);
-            } catch (JSONException e) {
-                Log.e(LOG_TAG, e.getMessage(), e);
-                e.printStackTrace();
-            }
-
-            // This will only happen if there was an error getting or parsing the forecast.
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList<Movie> result) {
-            if (result != null) {
-                mMovieAdapter.addAll(result);
-                mCurrentPage = mNextPage;
-            }
-            Log.d(LOG_TAG, "NextPage =" + mNextPage);
-            Log.d(LOG_TAG, "CurrentPage " + mCurrentPage);
-
-            mProgressBar.setVisibility(View.GONE);
+            });
         }
     }
+
+    private void updateToolbar() {
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        ActionBar actionBar = activity.getSupportActionBar();
+        if (null != actionBar) {
+            actionBar.setTitle(Utility.getSelectionName(getActivity()));
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mMovieAdapter.swapCursor(null);
+    }
+
+    /**
+     * A callback interface that all activities containing this fragment must
+     * implement. This mechanism allows activities to be notified of item
+     * selections.
+     */
+    public interface Callback {
+        /**
+         * DetailActivityFragmentCallback for when an item has been selected.
+         */
+        public void onItemSelected(Uri uri, Boolean favorite, MovieAdapter.MovieAdapterViewHolder vh);
+    }
+
 }
 
 

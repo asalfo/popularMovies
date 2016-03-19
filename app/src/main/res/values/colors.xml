@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="black">#ff000000</color>
+    <color name="white">#ffffffff</color>
     <color name="grey">#cccccc</color>
     <color name="movie_app_light_black">#d6060606</color>
     <color name="movie_app_black">#080808</color>
@@ -10,4 +11,21 @@
     <color name="primary_text_color">@color/text_primary_dark</color>
     <color name="secondary_text_color">@color/text_secondary_dark</color>
     <color name="disabled_text_color">@color/grey</color>
+
+    <!-- using the "Blue Grey" Material Palette -->
+    <color name="primary">#607D8B</color>  <!-- 500 -->
+    <color name="primary_dark">#455A64</color>  <!-- 700 -->
+    <color name="primary_light">#CFD8DCFF</color> <!-- 100 -->
+    <color name="accent">#263238</color>
+    <color name="text_view_background_light">#85dddddd</color>
+    <color name="text_view_background">#85000000</color>
+    <color name="window_bg">#ff181818</color>
+    <color name="action_bar_bg_gradient_end_color">#b3000000</color>
+    <color name="transparent">#00000000</color>
+    <color name="capability_badge_light">@color/white</color>
+    <color name="text_color_standard">@android:color/white</color>
+    <color name="selectedBackgroundEndColor">#ffebbc1b</color>
+    <color name="selectedBackgroundStartColor">#fff1d269</color>
+    <color name="text_color_87">@android:color/white</color>
+    <color name="text_color_54">@android:color/white</color>
 </resources>

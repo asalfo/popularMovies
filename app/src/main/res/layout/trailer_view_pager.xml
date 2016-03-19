@@ -1,0 +1,31 @@
+<FrameLayout
+    android:id="@+id/trailer_slideshow_layout"
+    style="@style/match"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_margin="0dp"
+        />
+
+    <com.asalfo.movies.ui.CirclePageIndicator
+        android:id="@+id/indicator"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/view_pager"
+        android:padding="1dip"
+        android:layout_gravity="bottom" />
+
+    <TextView
+        android:id="@+id/img_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/indicator"
+        android:singleLine="true"
+        android:textColor="#ededed"
+        android:layout_gravity="bottom|right"
+        android:layout_marginRight="5dip"
+        android:layout_marginBottom="20dip" />
+</FrameLayout>

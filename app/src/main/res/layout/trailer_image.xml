@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <ImageView
+        android:layout_gravity="center"
+        android:id="@+id/image_display"
+        android:focusable="true"
+        android:scaleType="centerCrop"
+        android:adjustViewBounds="true"
+        tools:src="@drawable/trailler"
+        style="@style/match" />
+
+    <ImageView
+        android:gravity="bottom"
+        android:layout_gravity="bottom"
+        android:background="@drawable/mdp_background"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/empty"
+        style="@style/match" />
+
+    <com.asalfo.movies.ui.IconFontTextView
+        android:id="@+id/play_button"
+        android:textSize="@dimen/cw_play_overlay_size"
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/details_play_overlay_bottom_margin"
+        android:text="@string/icon_font_play_w_ring"
+        style="@style/IconFontBasic" />
+</merge>

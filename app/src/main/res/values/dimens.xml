@@ -2,14 +2,34 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
-    <dimen name="fab_margin">16dp</dimen>
     <dimen name="text_micro">10.0sp</dimen>
     <dimen name="text_small">14.0sp</dimen>
     <dimen name="text_small_medium">16.0sp</dimen>
     <dimen name="text_large">22.0sp</dimen>
     <dimen name="text_medium">18.0sp</dimen>
     <dimen name="content_padding">8.0dip</dimen>
-    <dimen name="button_min_height">40.0dip</dimen>
-    <dimen name="button_padding">16.0dip</dimen>
-    <item type="dimen" name="line_spacing_expanded">1.2</item>
+    <item name="line_spacing_expanded" type="dimen">1.2</item>
+    <dimen name="double_padding">16.0dip</dimen>
+    <dimen name="cw_play_overlay_size">60.0dip</dimen>
+    <dimen name="details_play_overlay_bottom_margin">0.0dip</dimen>
+    <dimen name="text_size_standard">15.0sp</dimen>
+    <dimen name="TitleSummaryItemPaddingBottom">15.0dip</dimen>
+    <dimen name="text_size_subhead">16.0sp</dimen>
+    <dimen name="ratingWidth">36.0dip</dimen>
+    <dimen name="ratingHeight">36.0dip</dimen>
+    <dimen name="text_size_body_1">14.0sp</dimen>
+    <dimen name="text_size_body_2">14.0sp</dimen>
+    <dimen name="text_size_caption">12.0sp</dimen>
+    <dimen name="detail_backdrop_height">256dp</dimen>
+    <dimen name="appbar_elevation">4dp</dimen>
+    <dimen name="list_item_extra_padding">0dp</dimen>
+    <dimen name="detail_view_padding">@dimen/abc_list_item_padding_horizontal_material</dimen>
+    <dimen name="detail_container_bottom_margin">@dimen/detail_view_padding</dimen>
+    <dimen name="detail_card_elevation">6dp</dimen>
+    <dimen name="list_icon">40dp</dimen>
+
+
+    <dimen name="item_margin">1dp</dimen>
+    <dimen name="column_width">120dp</dimen>
+    <dimen name="column_height">160dp</dimen>
 </resources>

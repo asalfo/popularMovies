@@ -1,23 +1,31 @@
 <resources>
     <string name="app_name">Pop Movies</string>
     <string name="action_settings">Settings</string>
+    <string name="action_share">Share</string>
     <string name="title_preference">Settings</string>
     <string name="pref_sort_label">Sort</string>
-    <string name="pref_sort_label_most_popular"> Most popular</string>
+    <string name="pref_sort_label_most_popular">Most popular</string>
     <string name="pref_sort_label_highest_rated">Highest rated</string>
+    <string name="pref_sort_label_my_favorite">Favorites</string>
     <string name="pref_sort_key" translatable="false">sort_by</string>
     <string name="pref_sort_most_popular" translatable="false">popularity.desc</string>
     <string name="pref_sort_highest_rated" translatable="false">vote_average.desc</string>
+    <string name="pref_sort_favorite" translatable="false">favorite</string>
 
     <string name="pref_header_general">General</string>
     <string name="title_activity_detail">Movie</string>
-    <string name="movie_date">2015-05-21</string>
-    <string name="movie_rate">9.99</string>
-    <string name="synopsis">
-        Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy
-        text ever since the 1500s, when an unknown printer took
-        a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap.
-    </string>
 
-
+    <string name="empty"></string>
+    <string name="title">Harry Potter and the order of the Phoenix</string>
+    <string name="review_title">Reviews</string>
+    <string name="title_activity_movie_detail">MovieDetailActivity</string>
+    <string name="icon_font_play_w_ring"></string>
+    <string name="empty_review_list">No reviews for this movie.</string>
+    <string name="title_activity_scrolling">ScrollingActivity</string>
+    <string name="title_activity_reviews">Reviews</string>
+    <string name="content_authority">com.asalfo.movies</string>
+    <string name="sync_account_type">movies.asalfo.com</string>
+    <string name="empty_movie_list">No Movie Information Available</string>
+    <string name="empty_movie_list_no_network">No Movie information available. The network is not available to fetch movie data.</string>
+    <string name="empty_movie_list_server_down">No Movie information available. The server is not returning data.</string>
 </resources>

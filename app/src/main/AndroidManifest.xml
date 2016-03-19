@@ -3,13 +3,22 @@
     package="com.asalfo.movies">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Permissions required by the sync adapter -->
+    <uses-permission
+        android:name="android.permission.READ_SYNC_SETTINGS"/>
+    <uses-permission
+        android:name="android.permission.WRITE_SYNC_SETTINGS"/>
+    <uses-permission
+        android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
+    <uses-permission
+        android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/Theme.Default">
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
@@ -22,21 +31,59 @@
         </activity>
         <activity
             android:name=".DetailActivity"
+            android:launchMode="singleTop"
             android:label="@string/title_activity_detail"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/MovieAppDetailTheme">
+            android:theme="@style/MovieAppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.asalfo.movies.MainActivity"/>
+                android:value="com.asalfo.movies.MainActivity" />
         </activity>
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_preference"
+            android:theme="@style/MovieAppTheme"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.asalfo.movies.MainActivity"/>
+                android:value="com.asalfo.movies.MainActivity" />
         </activity>
+        <activity
+            android:name=".ReviewsActivity"
+            android:theme="@style/MovieAppTheme"
+            android:label="@string/title_activity_reviews">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.asalfo.movies.DetailActivity" />
+        </activity>
+ <provider
+     android:authorities="@string/content_authority"
+     android:name=".data.MovieProvider"
+     android:exported="false"
+     android:syncable="true"/>
+
+        <!-- SyncAdapter's dummy authentication service -->
+        <service android:name=".service.MovieAuthenticatorService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+
+        <!-- The SyncAdapter service -->
+        <service
+            android:name=".service.SyncService"
+            android:exported="true"
+            >
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter" />
+        </service>
     </application>
 
 </manifest>
