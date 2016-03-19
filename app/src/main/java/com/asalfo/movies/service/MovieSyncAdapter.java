@@ -155,8 +155,10 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
         Log.d(LOG_TAG, "Starting sync");
         Context context = getContext();
         String selection = Utility.getPreferredSelection(context);
-        if(selection == "favorite")
+        if(selection == "favorites")
             selection = DEFAULT_SELECTION;
+
+        Log.d(LOG_TAG, "Starting sync "+selection);
         // query
         for (int page = 1; page <= MAX_PAGES; page++) {
 
@@ -190,8 +192,6 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                         cVVector.add(movieValues);
                     }
 
-
-                    int inserted = 0;
                     // add to database
                     if (cVVector.size() > 0) {
 

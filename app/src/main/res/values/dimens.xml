@@ -27,4 +27,9 @@
     <dimen name="detail_container_bottom_margin">@dimen/detail_view_padding</dimen>
     <dimen name="detail_card_elevation">6dp</dimen>
     <dimen name="list_icon">40dp</dimen>
+
+
+    <dimen name="item_margin">1dp</dimen>
+    <dimen name="column_width">120dp</dimen>
+    <dimen name="column_height">160dp</dimen>
 </resources>

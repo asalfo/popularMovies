@@ -20,8 +20,10 @@ public class DetailActivity extends AppCompatActivity {
 
             Bundle arguments = new Bundle();
             Boolean favorite = getIntent().getBooleanExtra(DetailActivityFragment.FAVORITE, false);
+            Boolean twopane = getIntent().getBooleanExtra(DetailActivityFragment.TWO_PANE, false);
             arguments.putParcelable(DetailActivityFragment.DETAIL_URI, getIntent().getData());
-            arguments.putBoolean(DetailActivityFragment.FAVORITE,favorite);
+            arguments.putBoolean(DetailActivityFragment.FAVORITE, favorite);
+            arguments.putBoolean(DetailActivityFragment.TWO_PANE,twopane);
 
             DetailActivityFragment fragment = new DetailActivityFragment();
             fragment.setArguments(arguments);

@@ -15,7 +15,7 @@
         android:gravity="bottom"
         android:layout_gravity="bottom"
         android:background="@drawable/mdp_background"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:contentDescription="@string/empty"
         style="@style/match" />
 

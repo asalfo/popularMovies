@@ -4,9 +4,9 @@
     <string name="action_share">Share</string>
     <string name="title_preference">Settings</string>
     <string name="pref_sort_label">Sort</string>
-    <string name="pref_sort_label_most_popular"> Most popular</string>
+    <string name="pref_sort_label_most_popular">Most popular</string>
     <string name="pref_sort_label_highest_rated">Highest rated</string>
-    <string name="pref_sort_label_my_favorite">Favorite</string>
+    <string name="pref_sort_label_my_favorite">Favorites</string>
     <string name="pref_sort_key" translatable="false">sort_by</string>
     <string name="pref_sort_most_popular" translatable="false">popularity.desc</string>
     <string name="pref_sort_highest_rated" translatable="false">vote_average.desc</string>
@@ -17,6 +17,7 @@
 
     <string name="empty"></string>
     <string name="title">Harry Potter and the order of the Phoenix</string>
+    <string name="review_title">Reviews</string>
     <string name="title_activity_movie_detail">MovieDetailActivity</string>
     <string name="icon_font_play_w_ring"></string>
     <string name="empty_review_list">No reviews for this movie.</string>

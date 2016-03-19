@@ -60,7 +60,7 @@ public class ReviewsActivityFragment extends Fragment {
         mRecyclerViewReview.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerViewReview.setHasFixedSize(false);
 
-        mReviewAdapter = new ReviewAdapter(mReviews,emptyView);
+        mReviewAdapter = new ReviewAdapter(mReviews,emptyView,R.layout.list_item_review);
         mRecyclerViewReview.setAdapter(mReviewAdapter);
 
         return rootView;

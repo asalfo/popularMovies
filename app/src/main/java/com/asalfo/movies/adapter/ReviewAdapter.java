@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.asalfo.movies.model.Review;
 import com.asalfo.movies.R;
+import com.ms.square.android.expandabletextview.ExpandableTextView;
 ;
 
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder> {
     private ArrayList<Review> mDataset;
     private View mEmptyView;
+    private int mLayoutId;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -26,21 +28,22 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         public TextView mAuthor;
-        public TextView mContent;
+        public ExpandableTextView mContent;
 
 
         public ViewHolder(View view) {
             super(view);
             mAuthor = (TextView) view.findViewById(R.id.list_item_author_textview);
-            mContent = (TextView) view.findViewById(R.id.list_item_content_textview);
+            mContent = (ExpandableTextView) view.findViewById(R.id.list_item_content_textview);
 
         }
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public ReviewAdapter(ArrayList<Review> dataset, View emptyView ) {
+    public ReviewAdapter(ArrayList<Review> dataset, View emptyView, int layoutId ) {
         mDataset = dataset;
         mEmptyView = emptyView;
+        mLayoutId = layoutId;
     }
 
     // Create new views (invoked by the layout manager)
@@ -49,7 +52,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
                                                    int viewType) {
         // create a new view
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.list_item_review, parent, false);
+                .inflate(mLayoutId, parent, false);
 
         ViewHolder vh = new ViewHolder(v);
         return vh;

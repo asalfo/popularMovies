@@ -9,11 +9,11 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
-import android.support.v7.widget.ShareActionProvider;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,23 +27,22 @@ import android.view.ViewParent;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.asalfo.movies.adapter.ReviewAdapter;
 import com.asalfo.movies.adapter.TrailerSlideAdapter;
 import com.asalfo.movies.data.MovieContract;
 import com.asalfo.movies.model.Review;
-import com.asalfo.movies.model.TmdbCollection;
 import com.asalfo.movies.model.Video;
 import com.asalfo.movies.service.ApiService;
 import com.asalfo.movies.service.FavoriteMovieTask;
+import com.asalfo.movies.service.ReviewTask;
 import com.asalfo.movies.service.ServiceGenerator;
+import com.asalfo.movies.service.VideoTask;
 import com.asalfo.movies.ui.CirclePageIndicator;
 import com.asalfo.movies.ui.PageIndicator;
+import com.ms.square.android.expandabletextview.ExpandableTextView;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -123,6 +122,7 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
     public static final String REVIEWS_KEY = "reviews";
     public static final String VIDEO_KEY = "reviews";
     static final String DETAIL_URI = "URI";
+    static final String TWO_PANE = "twopane";
     static final String FAVORITE = "favorite";
 
     private static final String MOVIE_SHARE_HASHTAG = " #PopularMovieApp";
@@ -143,53 +143,35 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
     private TextView mVoteAverage;
     private TextView mVoteCount;
     private TextView mPopularity;
-    private TextView mSynopsis;
+    private ExpandableTextView mSynopsis;
     private ImageView mFavIcon;
-    private TextView mReviewCount;
-    private View mReviewView;
+
+    private RecyclerView mRecyclerViewReview;
+    private TextView mEmptyReviewView;
+    private ReviewAdapter mReviewAdapter;
     private TrailerSlideAdapter mTrailerAdapter;
     private ViewPager mViewPager;
     private Runnable animateViewPager;
     private Handler handler;
-    private ShareActionProvider mShareActionProvider;
     private String mShareTrailer;
+    private boolean mTwoPane;
 
     public DetailActivityFragment() {
         setHasOptionsMenu(true);
     }
 
 
-
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-
         Bundle arguments = getArguments();
-
         if (arguments != null) {
-
             mUri = arguments.getParcelable(DetailActivityFragment.DETAIL_URI);
             mFavoriteMovie = arguments.getBoolean(DetailActivityFragment.FAVORITE, false);
-        } else {
-
+            mTwoPane = arguments.getBoolean(DetailActivityFragment.TWO_PANE, false);
         }
-
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
-
-        mReviewView = rootView.findViewById(R.id.reviews);
-        mReviewView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Intent intent = new Intent(getActivity(), ReviewsActivity.class)
-                        .putParcelableArrayListExtra(REVIEWS_KEY, mReviews);
-                startActivity(intent);
-            }
-        });
-
 
         mFavIcon = (ImageView) rootView.findViewById(R.id.fav_icon);
 
@@ -201,20 +183,34 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
                 favTask.execute(mTmdbMovieId, action);
             }
         });
-        mReviewCount = (TextView) rootView.findViewById(R.id.review_count);
+
         mPoster = (ImageView) rootView.findViewById(R.id.movie_poster);
         mTitle = (TextView) rootView.findViewById(R.id.movie_title);
         mReleaseDate = (TextView) rootView.findViewById(R.id.movie_release_date);
         mVoteAverage = (TextView) rootView.findViewById(R.id.movie_vote_average);
         mVoteCount = (TextView) rootView.findViewById(R.id.movie_vote_count);
         mPopularity = (TextView) rootView.findViewById(R.id.movie_popularity);
-        mSynopsis = (TextView) rootView.findViewById(R.id.movie_synopsis);
+        mSynopsis = (ExpandableTextView) rootView.findViewById(R.id.movie_synopsis);
         mViewPager = (ViewPager) rootView.findViewById(R.id.view_pager);
         mIndicator = (CirclePageIndicator) rootView.findViewById(R.id.indicator);
         mImgNameTxt = (TextView) rootView.findViewById(R.id.img_name);
 
+        mEmptyReviewView = (TextView) rootView.findViewById(R.id.recyclerview_review_empty);
+        mRecyclerViewReview = (RecyclerView) rootView.findViewById(R.id.reviews_recycler_view);
+        mRecyclerViewReview.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mRecyclerViewReview.setHasFixedSize(false);
+
+        mReviewAdapter = new ReviewAdapter(mReviews, mEmptyReviewView, R.layout.list_item_review_short);
+        mRecyclerViewReview.setAdapter(mReviewAdapter);
+
 
         mIndicator.setOnPageChangeListener(new PageChangeListener());
+        mTrailerAdapter = new TrailerSlideAdapter(
+                getActivity(), DetailActivityFragment.this);
+        mViewPager.setAdapter(mTrailerAdapter);
+
+        mIndicator.setViewPager(mViewPager);
+
         mViewPager.addOnPageChangeListener(new PageChangeListener());
         mViewPager.setOnTouchListener(new View.OnTouchListener() {
 
@@ -238,7 +234,7 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
 
                     case MotionEvent.ACTION_MOVE:
                         // calls when ViewPager touch
-                        if (handler != null && mStopSliding == false) {
+                        if (handler != null && !mStopSliding) {
                             mStopSliding = true;
                             handler.removeCallbacks(animateViewPager);
                         }
@@ -252,8 +248,7 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
     }
 
 
-
-    void onLocationChanged( String newSelection ) {
+    void onSelectionChanged() {
         Uri uri = mUri;
         if (null != uri) {
             getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
@@ -267,11 +262,9 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_detail, menu);
-        MenuItem menuItem = menu.findItem(R.id.action_share);
-        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
-        if (mShareTrailer!= null) {
-            createShareForecastIntent();
+        if (getActivity() instanceof DetailActivity) {
+            inflater.inflate(R.menu.menu_detail, menu);
+            finishCreatingMenu(menu);
         }
     }
 
@@ -300,7 +293,6 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
     }
 
 
-
     public void runnable(final int size) {
         handler = new Handler();
         animateViewPager = new Runnable() {
@@ -323,8 +315,6 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
         Log.d(LOG_TAG, "onCreateLoader sss " + mUri);
 
         if (null != mUri) {
-            // Now create and return a CursorLoader that will take care of
-            // creating a Cursor for the data being displayed.
             return new CursorLoader(
                     getActivity(),
                     mUri,
@@ -344,10 +334,12 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        Boolean mt = false;
         if (data != null && data.moveToFirst()) {
             ViewParent vp = getView().getParent();
             if (vp instanceof CardView) {
                 ((View) vp).setVisibility(View.VISIBLE);
+                mt = true;
             }
             mTmdbMovieId = data.getString(COLUMN_MOVIE_ID);
 
@@ -366,176 +358,68 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
             mVoteCount.setText(data.getString(COLUMN_VOTE_COUNT));
             mPopularity.setText(String.format("%1$.2f", data.getFloat(COLUMN_POPULARITY)));
             mSynopsis.setText(data.getString(COLUMN_OVERVIEW));
-            retrieveVideos(movie_id);
-            retreiveReviews(movie_id);
+
+            if (mVideos.isEmpty()) {
+                VideoTask videoTask = new VideoTask(this);
+                videoTask.execute(movie_id, mFavoriteMovie ? "true" : "false");
+            }
+
+            if (mReviews.isEmpty()) {
+                ReviewTask reviewTask = new ReviewTask(this);
+                reviewTask.execute(movie_id, mFavoriteMovie ? "true" : "false");
+            }
 
             createShareForecastIntent();
-            AppCompatActivity activity = (AppCompatActivity)getActivity();
+            AppCompatActivity activity = (AppCompatActivity) getActivity();
             Toolbar toolbarView = (Toolbar) getView().findViewById(R.id.toolbar);
 
-                if ( null != toolbarView ) {
+            if (!mTwoPane) {
+                if (null != toolbarView) {
                     activity.setSupportActionBar(toolbarView);
 
                     activity.getSupportActionBar().setDisplayShowTitleEnabled(false);
                     activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+                }
+            } else {
+                if (null != toolbarView) {
                     Menu menu = toolbarView.getMenu();
-                    if ( null != menu ) menu.clear();
+                    if (null != menu) menu.clear();
                     toolbarView.inflateMenu(R.menu.menu_detail);
                     finishCreatingMenu(toolbarView.getMenu());
                 }
+            }
 
 
         }
 
     }
 
-    private void retrieveVideos(String movie_id) {
-        mVideos.clear();
-        if (mFavoriteMovie) {
-            Uri favoriteUri = MovieContract.VideoEntry.buildVideoMovie(movie_id);
+    public void updateVideos(ArrayList<Video> videos) {
 
-            Cursor videoCursor = getActivity().getContentResolver().query(
-                    favoriteUri,
-                    VIDEO_COLUMNS,
-                    MovieContract.FavoriteEntry.COLUMN_MOVIE_ID + " = ?",
-                    new String[]{ movie_id},
-                    null);
+        mVideos = videos;
+        if (mVideos != null && mVideos.size() != 0) {
+            mTrailerAdapter.swapData(mVideos);
+            mImgNameTxt.setText(""
+                    + mVideos.get(mViewPager
+                    .getCurrentItem()).getName());
+            runnable(mVideos.size());
+            handler.postDelayed(animateViewPager,
+                    ANIM_VIEWPAGER_DELAY);
 
-            if (videoCursor.moveToFirst()) {
-                do {
-                    Video video = new Video(videoCursor.getString(COL_VIDEO_ID),
-                            videoCursor.getString(COL_VIDEO_LANGUAGE),
-                            videoCursor.getString(COL_VIDEO_KEY),
-                            videoCursor.getString(COL_VIDEO_NAME),
-                            videoCursor.getString(COL_VIDEO_SITE),
-                            videoCursor.getString(COL_VIDEO_SIZE),
-                            videoCursor.getString(COL_VIDEO_TYPE)
-                    );
-                    mVideos.add(video);
-                    if(mVideos.size() == 1 ) {
-                        mShareTrailer = Utility.generateYoutubeVideoUrl(mVideos.get(0).getKey());
-                    }
-
-                }while (videoCursor.moveToNext());
-            }
-
-            if (mVideos != null && mVideos.size() != 0) {
-                mTrailerAdapter = new TrailerSlideAdapter(
-                        getActivity(), mVideos, DetailActivityFragment.this);
-                mViewPager.setAdapter(mTrailerAdapter);
-
-                mIndicator.setViewPager(mViewPager);
-                mImgNameTxt.setText(""
-                        + ((Video) mVideos.get(mViewPager
-                        .getCurrentItem())).getName());
-                runnable(mVideos.size());
-                handler.postDelayed(animateViewPager,
-                        ANIM_VIEWPAGER_DELAY);
-            } else {
-                mImgNameTxt.setText("No trailer");
-            }
-            videoCursor.close();
-
-
+            mShareTrailer = Utility.generateYoutubeVideoUrl(mVideos.get(0).getKey());
         } else {
-            Call<TmdbCollection<Video>> call = apiService.getVideos(movie_id, BuildConfig.THE_MOVIE_DB_API_KEY);
-            call.enqueue(new Callback<TmdbCollection<Video>>() {
-                @Override
-                public void onResponse(Response<TmdbCollection<Video>> response) {
-                    if (response.isSuccess()) {
-                        TmdbCollection<Video> collection = response.body();
-                        mVideos.addAll(collection.getResults());
-                        if (mVideos != null && mVideos.size() != 0) {
-                            mTrailerAdapter = new TrailerSlideAdapter(
-                                    getActivity(), mVideos, DetailActivityFragment.this);
-                            mViewPager.setAdapter(mTrailerAdapter);
-
-                            mIndicator.setViewPager(mViewPager);
-                            mImgNameTxt.setText(""
-                                    + ((Video) mVideos.get(mViewPager
-                                    .getCurrentItem())).getName());
-                            runnable(mVideos.size());
-                            handler.postDelayed(animateViewPager,
-                                    ANIM_VIEWPAGER_DELAY);
-                        } else {
-                            mImgNameTxt.setText("No trailer");
-                        }
-
-                    } else {
-                        Log.d(LOG_TAG, "Faill");
-                    }
-
-                }
-
-                @Override
-                public void onFailure(Throwable t) {
-                    Log.d(LOG_TAG, t.getMessage());
-                }
-            });
+            mImgNameTxt.setText("No trailer");
         }
-
-
     }
 
-    private void retreiveReviews(String movie_id) {
-        mReviews.clear();
-        if (mFavoriteMovie) {
-            Uri favoriteUri = MovieContract.ReviewEntry.buildReviewMovie(movie_id);
-            Cursor reviewCursor = getActivity().getContentResolver().query(
-                    favoriteUri,
-                    REVIEWS_COLUMNS,
-                    MovieContract.FavoriteEntry.COLUMN_MOVIE_ID + " = ?",
-                    new String[]{ movie_id},
-                    null);
 
-            if (reviewCursor.moveToFirst()) {
-                do {
-                    Review review = new Review(reviewCursor.getString(COL_REVIEW_ID),
-                            reviewCursor.getString(COL_REVIEW_AUTHOR),
-                            reviewCursor.getString(COL_REVIEW_CONTENT),
-                            reviewCursor.getString(COL_REVIEW_URL)
-                    );
-                    mReviews.add(review);
-
-
-                }while (reviewCursor.moveToNext());
-            }
-            if (mReviews != null && mReviews.size() > 0) {
-                mReviewCount.setText(Integer.toString(mReviews.size()));
-                mReviewView.setVisibility(View.VISIBLE);
-            }
-            reviewCursor.close();
-
-
-        } else {
-
-            Call<TmdbCollection<Review>> call = apiService.getReviews(movie_id, BuildConfig.THE_MOVIE_DB_API_KEY);
-            call.enqueue(new Callback<TmdbCollection<Review>>() {
-                @Override
-                public void onResponse(Response<TmdbCollection<Review>> response) {
-                    if (response.isSuccess()) {
-                        TmdbCollection<Review> collection = response.body();
-                        mReviews.addAll(collection.getResults());
-                        if (mReviews != null && mReviews.size() > 0) {
-                            mReviewCount.setText(Integer.toString(mReviews.size()));
-                            mReviewView.setVisibility(View.VISIBLE);
-                        }
-                    } else {
-                        Log.d(LOG_TAG, "Faill");
-                    }
-
-                }
-
-                @Override
-                public void onFailure(Throwable t) {
-                    Log.d(LOG_TAG, t.getMessage());
-                }
-            });
+    public void updateReviews(ArrayList<Review> reviews) {
+        mReviews = reviews;
+        if (mReviews != null && mReviews.size() > 0) {
+            mReviewAdapter.swapData(mReviews);
         }
-
-
     }
+
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
@@ -549,8 +433,8 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
             if (state == ViewPager.SCROLL_STATE_IDLE) {
                 if (mVideos != null) {
                     mImgNameTxt.setText(""
-                            + ((Video) mVideos.get(mViewPager
-                            .getCurrentItem())).getName());
+                            + mVideos.get(mViewPager
+                            .getCurrentItem()).getName());
                 }
             }
         }

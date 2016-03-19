@@ -24,8 +24,8 @@ public class FavoriteMovieTask  extends AsyncTask<String, Void, Integer> {
     public static final String LOG_TAG = FavoriteMovieTask.class.getSimpleName();
     public static final String ACTION_ADD = "add";
     public static final String ACTION_REMOVE = "remove";
-     private final Context mContext;
-     private ImageView mFavIcon;
+    private final Context mContext;
+    private ImageView mFavIcon;
     private  ArrayList<Review> mReviews;
     private  ArrayList<Video> mVideos;
 

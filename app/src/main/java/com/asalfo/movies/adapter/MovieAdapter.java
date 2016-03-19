@@ -3,45 +3,36 @@ package com.asalfo.movies.adapter;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.widget.CursorAdapter;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.asalfo.movies.ItemChoiceManager;
 import com.asalfo.movies.MainActivityFragment;
 import com.asalfo.movies.data.MovieContract;
-import com.asalfo.movies.model.Movie;
 import com.asalfo.movies.R;
 import com.asalfo.movies.Utility;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 
-/**
- * Created by asalfo on 12/01/16.
- */
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder> {
 
     public static final String LOG_TAG = MovieAdapter.class.getSimpleName();
-    private Cursor mCursor;
     final private Context mContext;
     final private MovieAdapterOnClickHandler mClickHandler;
     final private View mEmptyView;
-    final private ItemChoiceManager mICM;
+    private Cursor mCursor;
+    private int mSelectedPos;
 
 
-    public MovieAdapter(Context context, MovieAdapterOnClickHandler dh, View emptyView, int choiceMode) {
+
+    public MovieAdapter(Context context, MovieAdapterOnClickHandler dh, View emptyView) {
         mContext = context;
         mClickHandler = dh;
         mEmptyView = emptyView;
-        mICM = new ItemChoiceManager(this);
-        mICM.setChoiceMode(choiceMode);
+        mSelectedPos = -1;
     }
 
     /**
@@ -61,9 +52,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         public void onClick(View v) {
             int adapterPosition = getAdapterPosition();
             mCursor.moveToPosition(adapterPosition);
+            mSelectedPos = adapterPosition;
             int idColumnIndex = mCursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_ID);
             mClickHandler.onClick(mCursor.getLong(idColumnIndex), this);
-            mICM.onClick(this);
         }
     }
 
@@ -87,21 +78,21 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         String thumbnailUrl = Utility.generatePosterUrl(posterPath, "w92");
 
         Picasso.with(mContext).load(thumbnailUrl).fit().into(holder.mPosterView);
-        mICM.onBindViewHolder(holder, position);
+
     }
 
 
     public void onRestoreInstanceState(Bundle savedInstanceState) {
-        mICM.onRestoreInstanceState(savedInstanceState);
+
     }
 
     public void onSaveInstanceState(Bundle outState) {
-        mICM.onSaveInstanceState(outState);
+
     }
 
 
     public int getSelectedItemPosition() {
-        return mICM.getSelectedItemPosition();
+        return mSelectedPos;
     }
 
 
@@ -114,7 +105,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     public void swapCursor(Cursor newCursor) {
         mCursor = newCursor;
         notifyDataSetChanged();
-        mEmptyView.setVisibility(getItemCount() == 0 ? View.VISIBLE : View.GONE);
+       mEmptyView.setVisibility((getItemCount() == 0 ? View.VISIBLE : View.GONE));
     }
 
     public Cursor getCursor() {

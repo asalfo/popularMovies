@@ -1,10 +1,13 @@
 package com.asalfo.movies;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
+import android.util.DisplayMetrics;
+import android.view.Display;
 
 /**
  * Created by asalfo on 21/01/16.
@@ -15,8 +18,20 @@ public class Utility {
     public static final String YOUTUBE_VIDEO_THUMBS_URL = "http://img.youtube.com/vi/%video_id%/hqdefault.jpg";
     public static final String YOUTUBE_VIDEO__URL = "https://www.youtube.com/watch?v=%video_id%";
     public static final String FAVORITE = "favorite";
+    public static final int COLUMNWIDTH = 260;
 
 
+
+
+    public static final int getNumColumns(Activity activity) {
+        Display display = activity.getWindowManager().getDefaultDisplay();
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        display.getMetrics(outMetrics);
+
+        float density  = activity.getResources().getDisplayMetrics().density;
+        float dpWidth  = outMetrics.widthPixels / density;
+        return Math.round(dpWidth / COLUMNWIDTH);
+    }
 
     public static String getPreferredSelection(Context context) {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -29,9 +44,12 @@ public class Utility {
         String selection = prefs.getString(context.getString(R.string.pref_sort_key),
                 context.getString(R.string.pref_sort_most_popular));
         String[] options =  context.getResources().getStringArray(R.array.pref_sort_options);
-        if(selection == context.getString(R.string.pref_sort_most_popular)){
+
+        if(!isNetworkAvailable(context)){
+            return options[2];
+        } else if(selection.equals(context.getString(R.string.pref_sort_most_popular))){
             return options[0];
-        }else if(selection == context.getString(R.string.pref_sort_highest_rated)){
+        }else if(selection.equals(context.getString(R.string.pref_sort_highest_rated))){
             return options[1];
         }else {
             return options[2];

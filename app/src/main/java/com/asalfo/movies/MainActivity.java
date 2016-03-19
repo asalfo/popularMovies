@@ -4,13 +4,10 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.asalfo.movies.adapter.MovieAdapter;
 import com.asalfo.movies.service.MovieSyncAdapter;
@@ -27,19 +24,15 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         mSelection = Utility.getPreferredSelection(this);
         Uri contentUri = getIntent() != null ? getIntent().getData() : null;
         setContentView(R.layout.activity_main);
+
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayShowTitleEnabled(true);
 
 
         if (findViewById(R.id.movie_detail_container) != null) {
-            // The detail container view will be present only in the large-screen layouts
-            // (res/layout-sw600dp). If this view is present, then the activity should be
-            // in two-pane mode.
             mTwoPane = true;
-            // In two-pane mode, show the detail view in this activity by
-            // adding or replacing the detail fragment using a
-            // fragment transaction.
+
             if (savedInstanceState == null) {
                 DetailActivityFragment fragment = new DetailActivityFragment();
                 if (contentUri != null) {
@@ -81,9 +74,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
 
             DetailActivityFragment df = (DetailActivityFragment)getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
             if ( null != df ) {
-                df.onLocationChanged(selection);
+                df.onSelectionChanged();
             }
-
 
             mSelection = selection;
         }
@@ -104,13 +96,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
     public void onItemSelected(Uri contentUri,Boolean favorite ,MovieAdapter.MovieAdapterViewHolder vh) {
 
         if (mTwoPane) {
-            // In two-pane mode, show the detail view in this activity by
-            // adding or replacing the detail fragment using a
-            // fragment transaction.
             Bundle args = new Bundle();
             args.putParcelable(DetailActivityFragment.DETAIL_URI, contentUri);
             args.putBoolean(DetailActivityFragment.FAVORITE, favorite);
-
+            args.putBoolean(DetailActivityFragment.TWO_PANE,true);
             DetailActivityFragment fragment = new DetailActivityFragment();
             fragment.setArguments(args);
 
@@ -122,7 +111,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
             Intent intent = new Intent(this, DetailActivity.class)
                     .setData(contentUri)
                     .putExtra(DetailActivityFragment.FAVORITE, favorite);
-
 
             ActivityCompat.startActivity(this, intent,null);
         }

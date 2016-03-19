@@ -28,16 +28,17 @@ public class TrailerSlideAdapter extends PagerAdapter {
 	List<Video> mVideos;
 	DetailActivityFragment homeFragment;
 
-	public TrailerSlideAdapter(FragmentActivity activity, List<Video> videos,
-							   DetailActivityFragment homeFragment) {
+	public TrailerSlideAdapter(FragmentActivity activity, DetailActivityFragment homeFragment) {
 		this.activity = activity;
 		this.homeFragment = homeFragment;
-		this.mVideos = videos;
 	}
 
 	@Override
 	public int getCount() {
-		return mVideos.size();
+		if(null != mVideos) {
+			return mVideos.size();
+		}
+		return 0;
 	}
 
 	@Override
@@ -50,16 +51,19 @@ public class TrailerSlideAdapter extends PagerAdapter {
 				.findViewById(R.id.image_display);
 
 
-		final Video video = (Video) mVideos.get(position);
+		final Video video = mVideos.get(position);
 		IconFontTextView play = (IconFontTextView) view.findViewById(R.id.play_button);
 		play.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Toast.makeText(activity,video.getKey()+"hola",Toast.LENGTH_LONG).show();
 				Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + video.getKey()));
 				 activity.startActivity(intent);
 			}
 		});
+
+		if(!Utility.isNetworkAvailable(activity)){
+			play.setVisibility(View.GONE);
+		}
 
 		String trailerUrl = Utility.generateYoutubeVideoThumbnailUrl(video.getKey());
 
