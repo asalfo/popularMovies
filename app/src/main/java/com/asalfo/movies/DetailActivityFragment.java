@@ -1,6 +1,7 @@
 package com.asalfo.movies;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -369,7 +370,6 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
                 reviewTask.execute(movie_id, mFavoriteMovie ? "true" : "false");
             }
 
-            createShareForecastIntent();
             AppCompatActivity activity = (AppCompatActivity) getActivity();
             Toolbar toolbarView = (Toolbar) getView().findViewById(R.id.toolbar);
 
@@ -407,8 +407,20 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
                     ANIM_VIEWPAGER_DELAY);
 
             mShareTrailer = Utility.generateYoutubeVideoUrl(mVideos.get(0).getKey());
+
+            Log.d(LOG_TAG,"SHARE "+mShareTrailer);
         } else {
             mImgNameTxt.setText("No trailer");
+        }
+    }
+
+    private void refreshMenu() {
+        Toolbar toolbarView = (Toolbar) getView().findViewById(R.id.toolbar);
+        if (null != toolbarView) {
+            Menu menu = toolbarView.getMenu();
+            if (null != menu) menu.clear();
+            toolbarView.inflateMenu(R.menu.menu_detail);
+            finishCreatingMenu(toolbarView.getMenu());
         }
     }
 
@@ -425,6 +437,8 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
     public void onLoaderReset(Loader<Cursor> loader) {
 
     }
+
+
 
     private class PageChangeListener implements ViewPager.OnPageChangeListener {
 

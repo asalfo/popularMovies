@@ -17,6 +17,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -130,11 +131,12 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         super.onResume();
     }
 
-    // since we read the selection when we create the loader, all we need to do is restart things
+
     void onSelectionChanged(String selection) {
         Bundle args = new Bundle();
         args.putString(MainActivityFragment.SELECTION, selection);
         getLoaderManager().restartLoader(MOVIE_LOADER, args, this);
+
     }
 
     private void loadFavoriteMovies() {

@@ -6,9 +6,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-/**
- * Created by asalfo on 14/01/16.
- */
 public class SettingsActivity extends AppCompatActivity {
 
     @Override

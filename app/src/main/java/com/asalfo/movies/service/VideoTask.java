@@ -56,30 +56,30 @@ public class VideoTask  extends AsyncTask<String, Void, ArrayList<Video>>{
 
         if (isFavorite) {
             Uri favoriteUri = MovieContract.VideoEntry.buildVideoMovie(movie_id);
+            if(null != mFragment.get()) {
+                Cursor videoCursor = mFragment.get().getActivity().getContentResolver().query(
+                        favoriteUri,
+                        VIDEO_COLUMNS,
+                        MovieContract.FavoriteEntry.COLUMN_MOVIE_ID + " = ?",
+                        new String[]{movie_id},
+                        null);
 
-            Cursor videoCursor = mFragment.get().getActivity().getContentResolver().query(
-                    favoriteUri,
-                    VIDEO_COLUMNS,
-                    MovieContract.FavoriteEntry.COLUMN_MOVIE_ID + " = ?",
-                    new String[]{movie_id},
-                    null);
+                if (videoCursor.moveToFirst()) {
+                    do {
+                        Video video = new Video(videoCursor.getString(COL_VIDEO_ID),
+                                videoCursor.getString(COL_VIDEO_LANGUAGE),
+                                videoCursor.getString(COL_VIDEO_KEY),
+                                videoCursor.getString(COL_VIDEO_NAME),
+                                videoCursor.getString(COL_VIDEO_SITE),
+                                videoCursor.getString(COL_VIDEO_SIZE),
+                                videoCursor.getString(COL_VIDEO_TYPE)
+                        );
+                        videos.add(video);
 
-            if (videoCursor.moveToFirst()) {
-                do {
-                    Video video = new Video(videoCursor.getString(COL_VIDEO_ID),
-                            videoCursor.getString(COL_VIDEO_LANGUAGE),
-                            videoCursor.getString(COL_VIDEO_KEY),
-                            videoCursor.getString(COL_VIDEO_NAME),
-                            videoCursor.getString(COL_VIDEO_SITE),
-                            videoCursor.getString(COL_VIDEO_SIZE),
-                            videoCursor.getString(COL_VIDEO_TYPE)
-                    );
-                    videos.add(video);
-
-                }while (videoCursor.moveToNext());
+                    } while (videoCursor.moveToNext());
+                }
+                videoCursor.close();
             }
-            videoCursor.close();
-
         }else{
             Call<TmdbCollection<Video>> call = apiService.getVideos(movie_id, BuildConfig.THE_MOVIE_DB_API_KEY);
             try {
@@ -94,6 +94,8 @@ public class VideoTask  extends AsyncTask<String, Void, ArrayList<Video>>{
 
     @Override
     protected void onPostExecute(ArrayList<Video> videos) {
-        mFragment.get().updateVideos(videos);
+        if(null != mFragment.get()) {
+            mFragment.get().updateVideos(videos);
+        }
     }
 }

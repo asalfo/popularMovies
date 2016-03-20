@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -64,11 +65,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d("MainActivy","onResume");
         String selection = Utility.getPreferredSelection(this);
-        // update the user selection in our second pane using the fragment manager
+        Log.d("MainActivy",selection);
+        Log.d("MainActivy",mSelection);
         if (selection != null && !selection.equals(mSelection)) {
             MainActivityFragment mainActivityFragmentf = (MainActivityFragment)getSupportFragmentManager().findFragmentById(R.id.fragment);
             if ( null != mainActivityFragmentf ) {
+                Log.d("MainActivy", "OQQQQQQQ");
                 mainActivityFragmentf.onSelectionChanged(selection);
             }
 
@@ -78,6 +82,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
             }
 
             mSelection = selection;
+        }else{
+
         }
     }
 
