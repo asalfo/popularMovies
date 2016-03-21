@@ -408,6 +408,7 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
 
             mShareTrailer = Utility.generateYoutubeVideoUrl(mVideos.get(0).getKey());
 
+            refreshMenu();
             Log.d(LOG_TAG,"SHARE "+mShareTrailer);
         } else {
             mImgNameTxt.setText("No trailer");
